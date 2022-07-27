@@ -1,5 +1,5 @@
-import os
 import time
+import shutil
 
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
@@ -24,7 +24,7 @@ class InitializeProject:
 def rebuild_configuration_file_dialog():
     if input() == 'y':
         print("creating configuration file...", end="")
-        os.popen(f'cp {Configuration.get_config_template_path()} {Configuration.get_config_path()}')
+        shutil.copy(Configuration.get_config_template_path(), Configuration.get_config_path())
         time.sleep(2)
         print("done")
     else:
@@ -54,12 +54,27 @@ if __name__ == '__main__':
             print(">> you will lose all your data if you do so. (y/n)", end=": ")
             if input() == 'y':
                 print("deleting database file...", end="")
-                os.popen(f'rm {configuration.get_database_file_path()}')
+                shutil.rmtree(configuration.get_database_file_path())
                 time.sleep(2)
                 print("done")
             else:
                 print("deletion canceled")
             print("-----------------------------------------------------")
+
+        print("do you want to RESTORE or BACKUP your database? (y/n)", end=": ")
+        if input() == 'y':
+            print("b for backup, r for restore", end=": ")
+            answer: str = input()
+            if input() == 'b':
+                print("backup database...", end="")
+                shutil.copy(configuration.get_database_file_path(), configuration.get_backup_database_file_path())
+                time.sleep(2)
+                print("done")
+            elif input() == 'r':
+                print("restoring database...", end="")
+                shutil.copy(configuration.get_backup_database_file_path(), configuration.get_database_file_path())
+                time.sleep(2)
+                print("done")
 
         print(">> do you want to initialize the database? (y/n)", end=": ")
         if input() == 'y':

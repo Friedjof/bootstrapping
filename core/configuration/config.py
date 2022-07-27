@@ -15,6 +15,9 @@ class Configuration:
     def get_database_path(self) -> str:
         return self.config['database']['path']
 
+    def get_backup_database_file_path(self) -> str:
+        return self.config['database']['backup_path']
+
     def get_database_file_path(self) -> str:
         return self.get_database_path().split('///')[1]
 
