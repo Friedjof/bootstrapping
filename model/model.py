@@ -4,29 +4,28 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class ExperimentGroup(Base):
-    __tablename__ = 'experiment_group'
+class Groups(Base):
+    __tablename__ = 'groups'
     id = sa.Column(sa.Integer, primary_key=True)
-    date = sa.Column(sa.DateTime)
+    name = sa.Column(sa.String(255), nullable=False)
 
     def __repr__(self):
-        return '<ExperimentGroup %r>' % self.name
+        return f'<Groups(name={self.name}, description={self.description})>'
 
 
-class ComparisonGroup(Base):
-    __tablename__ = 'comparison_group'
+class CollectedData(Base):
+    """
+    You may have to change this table if this table is not
+    in the same format as the data you want to store.
+    """
+    __tablename__ = 'collected_data'
     id = sa.Column(sa.Integer, primary_key=True)
+    group_id = sa.Column(sa.ForeignKey('groups.id'))
+
+    # here you can change the table format
+    user_id = sa.Column(sa.Integer)
     date = sa.Column(sa.DateTime)
+    value = sa.Column(sa.Integer)
 
     def __repr__(self):
-        return f'<ComparisonGroup {self.name}>'
-
-
-class Samples(Base):
-    __tablename__ = 'samples'
-    id = sa.Column(sa.Integer, primary_key=True)
-    date = sa.Column(sa.DateTime)
-    sample_id = sa.Column(sa.Integer)
-
-    def __repr__(self):
-        return f'<Samples {self.id} - {self.date} - {self.sample_id}>'
+        return f'<CollectedData {", ".join([f"{v}" for v in self.__dict__.vales()])}>'
