@@ -1,24 +1,18 @@
 import time
 import shutil
+import os
 
-from sqlalchemy import create_engine
-from sqlalchemy.future import Engine
-from sqlalchemy.orm import sessionmaker
-
-from model.model import Base
+from toolbox.database.database import Database
 from toolbox.configuration.config import Configuration
 
 
 class InitializeProject:
     def __init__(self, config: Configuration):
         self.config = config
-        self.Base = Base
 
-        self.engine: Engine = create_engine(self.config.get_database_path(), echo=True)
-        self.session = sessionmaker(bind=self.engine)()
-
-    def migrate_database(self):
-        self.Base.metadata.create_all(self.engine)
+    @staticmethod
+    def create_tables():
+        Database.create_tables()
 
 
 def rebuild_configuration_file_dialog():
@@ -48,47 +42,58 @@ if __name__ == '__main__':
         configuration: Configuration = Configuration()
         print("done")
         print("-----------------------------------------------------")
-        if configuration.database_file_exists():
+        if configuration.database_exists():
             print("database file found...")
             print("do you want to delete the database file?")
             print(">> you will lose all your data if you do so. (y/n)", end=": ")
             if input() == 'y':
                 print("deleting database file...", end="")
-                shutil.rmtree(configuration.get_database_file_path())
+                os.remove(configuration.get_database_path())
                 time.sleep(2)
                 print("done")
             else:
                 print("deletion canceled")
             print("-----------------------------------------------------")
 
-        print("do you want to RESTORE or BACKUP your database? (y/n)", end=": ")
-        if input() == 'y':
-            print("b for backup, r for restore", end=": ")
-            answer: str = input()
-            if answer == 'b':
-                print("backup database...", end="")
-                shutil.copy(configuration.get_database_file_path(), configuration.get_backup_database_file_path())
-                time.sleep(2)
-                print("done")
-            elif answer == 'r':
-                print("restoring database...", end="")
-                shutil.copy(configuration.get_backup_database_file_path(), configuration.get_database_file_path())
-                time.sleep(2)
-                print("done")
+        if configuration.database_backup_exists() or configuration.database_exists():
+            print(f"- Database file status:        {configuration.database_exists()}")
+            print(f"- Database backup file status: {configuration.database_backup_exists()}")
+            print("do you want to RESTORE or BACKUP your database? (y/n)", end=": ")
+            if input() == 'y':
+                print("b for backup, r for restore", end=": ")
+                answer: str = input()
+                if answer == 'b':
+                    print("backup database...", end="")
+                    if configuration.database_exists():
+                        shutil.copy(configuration.get_database_path(), configuration.get_backup_database_path())
+                        time.sleep(2)
+                        print("done")
+                    else:
+                        print("database file not found!")
+                elif answer == 'r':
+                    print("restoring database...", end="")
+                    if configuration.database_backup_exists():
+                        shutil.copy(configuration.get_backup_database_path(), configuration.get_database_path())
+                        time.sleep(2)
+                        print("done")
+                    else:
+                        print("database backup file not found!")
+                print("-----------------------------------------------------")
 
-        print(">> do you want to initialize the database? (y/n)", end=": ")
-        if input() == 'y':
-            print("initialize database...", end="")
-            init: InitializeProject = InitializeProject(config=configuration)
-            print("done")
-            print("-----------------------------------------------------")
-            print("create model schema...")
-            init.migrate_database()
-            print("...done")
-            print("-----------------------------------------------------")
-            print("database initialization finished successfully")
-        else:
-            print("database initialization canceled")
-            print("-----------------------------------------------------")
-        print("project initialisation has finished successfully")
-        print("*****************************************************")
+        if not configuration.database_exists():
+            print(">> do you want to initialize the database? (y/n)", end=": ")
+            if input() == 'y':
+                print("initialize database...", end="")
+                init: InitializeProject = InitializeProject(config=configuration)
+                print("done")
+                print("-----------------------------------------------------")
+                print("create model schema...", end="")
+                init.create_tables()
+                print("done")
+                print("-----------------------------------------------------")
+                print("database initialization finished successfully")
+            else:
+                print("database initialization canceled")
+                print("-----------------------------------------------------")
+            print("project initialisation has finished successfully")
+            print("*****************************************************")

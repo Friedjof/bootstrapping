@@ -21,16 +21,16 @@ class Configuration:
         return query_parser
 
     def get_database_path(self) -> str:
-        return self.config['database']['path']
+        return self.config['database']['running']
 
-    def get_backup_database_file_path(self) -> str:
-        return self.config['database']['backup_path']
+    def get_backup_database_path(self) -> str:
+        return self.config['database']['backup']
 
-    def get_database_file_path(self) -> str:
-        return self.get_database_path().split('///')[1]
+    def database_exists(self) -> bool:
+        return os.path.exists(self.get_database_path())
 
-    def database_file_exists(self) -> bool:
-        return os.path.exists(self.get_database_file_path())
+    def database_backup_exists(self) -> bool:
+        return os.path.exists(self.get_backup_database_path())
 
     @staticmethod
     def get_config_template_path() -> str:

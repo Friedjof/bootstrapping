@@ -8,7 +8,7 @@ from toolbox.query.query_manager import QueryManager
 if __name__ == '__main__':
     config: Configuration = Configuration()
 
-    connection = sqlite3.connect(config.get_database_file_path())
+    connection = sqlite3.connect(config.get_database_path())
 
     query_manager: QueryManager = QueryManager(connection, config)
     bootstrap: Bootstrap = Bootstrap(config=config)

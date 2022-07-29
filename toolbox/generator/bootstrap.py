@@ -4,7 +4,7 @@ from datetime import datetime
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
 
-from model.model import CollectedData, Groups
+from model.model import Collections, Groups
 
 
 class Bootstrap:
@@ -33,20 +33,9 @@ class Bootstrap:
 
     def save_samples(self) -> None:
         for sample_id, sample in enumerate(self.samples):
-            new_sample: Groups = Groups(
+            new_sample: Groups = Groups.get_or_create(
                 id=sample_id + 3,
                 name=f"Sample {sample_id + 1}",
             )
-            self.database.add(new_sample)
-            self.database.commit()
             for index, data in enumerate(sample):
-                print(data)
-                new_data_point = CollectedData(
-                    date=datetime.strptime(data[3], "%Y-%m-%d %H:%M:%S.%f"),
-                    user_id=data[2],
-                    value=data[4],
-                    group_id=new_sample.id
-                )
-                self.database.add(new_data_point)
-            self.database.commit()
-        self.database.close()
+                print(f"{type(data)} - {data}")
