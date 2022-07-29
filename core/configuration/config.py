@@ -12,6 +12,14 @@ class Configuration:
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
+    def get_query_path(self) -> str:
+        return self.config['queries']['path']
+
+    def get_query_parser(self) -> configparser.ConfigParser:
+        query_parser: configparser.ConfigParser = configparser.ConfigParser()
+        query_parser.read(self.get_query_path())
+        return query_parser
+
     def get_database_path(self) -> str:
         return self.config['database']['path']
 

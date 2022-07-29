@@ -65,12 +65,12 @@ if __name__ == '__main__':
         if input() == 'y':
             print("b for backup, r for restore", end=": ")
             answer: str = input()
-            if input() == 'b':
+            if answer == 'b':
                 print("backup database...", end="")
                 shutil.copy(configuration.get_database_file_path(), configuration.get_backup_database_file_path())
                 time.sleep(2)
                 print("done")
-            elif input() == 'r':
+            elif answer == 'r':
                 print("restoring database...", end="")
                 shutil.copy(configuration.get_backup_database_file_path(), configuration.get_database_file_path())
                 time.sleep(2)
