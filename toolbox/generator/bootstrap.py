@@ -37,5 +37,15 @@ class Bootstrap:
                 id=sample_id + 3,
                 name=f"Sample {sample_id + 1}",
             )
+            sample_data: list[Collections] = []
             for index, data in enumerate(sample):
-                print(f"{type(data)} - {data}")
+                sample_data.append(
+                    Collections(
+                        user_id=data[2],
+                        date=datetime.strptime(data[3], "%Y-%m-%d"),
+                        value=data[4],
+                    )
+                )
+
+            print(f"{sample_id}/{len(self.samples)}")
+            Collections.bulk_create(sample_data)
