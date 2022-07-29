@@ -1,18 +1,15 @@
 import random
 import datetime
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
 from model.model import CollectedData
-from core.configuration.config import Configuration
+from toolbox.configuration.config import Configuration
+from toolbox.database.database import Database
 
 
 class DataGenerator:
     def __init__(self):
         self.config = Configuration()
-        self.engine = create_engine(self.config.get_database_path(), echo=True)
-        self.session = sessionmaker(bind=self.engine)()
+        self.database: Database = Database(self.config)
 
         # Script setup
         self.user_id_start: int = 10000
@@ -34,13 +31,13 @@ class DataGenerator:
                     group_id=self.group_id
                 )
 
-                self.session.add(cd)
+                self.database.add(cd)
 
             print(f"{u}/10")
 
-        self.session.commit()
+        self.database.commit()
 
-        self.session.close()
+        self.database.close()
         print("I am done")
 
 

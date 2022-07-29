@@ -6,7 +6,7 @@ from sqlalchemy.future import Engine
 from sqlalchemy.orm import sessionmaker
 
 from model.model import Base
-from core.configuration.config import Configuration
+from toolbox.configuration.config import Configuration
 
 
 class InitializeProject:

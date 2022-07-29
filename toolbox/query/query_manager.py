@@ -1,7 +1,7 @@
 import sqlite3
 import configparser
 
-from core.configuration.config import Configuration
+from toolbox.configuration.config import Configuration
 
 
 class QueryManager:

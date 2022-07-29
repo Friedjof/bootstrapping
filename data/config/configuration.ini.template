@@ -1,3 +1,6 @@
 [database]
 path = sqlite:///data/database/db.sqlite
 backup_path = data/database/db.sqlite.bak
+
+[queries]
+path = data/config/queries.ini
