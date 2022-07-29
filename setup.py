@@ -61,34 +61,36 @@ if __name__ == '__main__':
                 print("deletion canceled")
             print("-----------------------------------------------------")
 
-        print("do you want to RESTORE or BACKUP your database? (y/n)", end=": ")
-        if input() == 'y':
-            print("b for backup, r for restore", end=": ")
-            answer: str = input()
-            if answer == 'b':
-                print("backup database...", end="")
-                shutil.copy(configuration.get_database_file_path(), configuration.get_backup_database_file_path())
-                time.sleep(2)
-                print("done")
-            elif answer == 'r':
-                print("restoring database...", end="")
-                shutil.copy(configuration.get_backup_database_file_path(), configuration.get_database_file_path())
-                time.sleep(2)
-                print("done")
+        if not configuration.database_file_exists() or not configuration.database_backup_file_exists():
+            print("do you want to RESTORE or BACKUP your database? (y/n)", end=": ")
+            if input() == 'y':
+                print("b for backup, r for restore", end=": ")
+                answer: str = input()
+                if answer == 'b':
+                    print("backup database...", end="")
+                    shutil.copy(configuration.get_database_file_path(), configuration.get_backup_database_file_path())
+                    time.sleep(2)
+                    print("done")
+                elif answer == 'r':
+                    print("restoring database...", end="")
+                    shutil.copy(configuration.get_backup_database_file_path(), configuration.get_database_file_path())
+                    time.sleep(2)
+                    print("done")
 
-        print(">> do you want to initialize the database? (y/n)", end=": ")
-        if input() == 'y':
-            print("initialize database...", end="")
-            init: InitializeProject = InitializeProject(config=configuration)
-            print("done")
-            print("-----------------------------------------------------")
-            print("create model schema...")
-            init.migrate_database()
-            print("...done")
-            print("-----------------------------------------------------")
-            print("database initialization finished successfully")
-        else:
-            print("database initialization canceled")
-            print("-----------------------------------------------------")
-        print("project initialisation has finished successfully")
-        print("*****************************************************")
+        if not configuration.database_file_exists():
+            print(">> do you want to initialize the database? (y/n)", end=": ")
+            if input() == 'y':
+                print("initialize database...", end="")
+                init: InitializeProject = InitializeProject(config=configuration)
+                print("done")
+                print("-----------------------------------------------------")
+                print("create model schema...")
+                init.migrate_database()
+                print("...done")
+                print("-----------------------------------------------------")
+                print("database initialization finished successfully")
+            else:
+                print("database initialization canceled")
+                print("-----------------------------------------------------")
+            print("project initialisation has finished successfully")
+            print("*****************************************************")

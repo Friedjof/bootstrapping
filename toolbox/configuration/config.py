@@ -32,6 +32,9 @@ class Configuration:
     def database_file_exists(self) -> bool:
         return os.path.exists(self.get_database_file_path())
 
+    def database_backup_file_exists(self) -> bool:
+        return os.path.exists(self.get_backup_database_file_path())
+
     @staticmethod
     def get_config_template_path() -> str:
         return "data/config/configuration.ini.template"
