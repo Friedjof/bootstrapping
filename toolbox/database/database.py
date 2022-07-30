@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from model.model import Collections, Groups
 from toolbox.configuration.config import Configuration
 
 
@@ -27,6 +28,9 @@ class Database:
 
     def get_session(self):
         return self.session
+
+    def get_samples(self, **kwargs):
+        return self.session.query(Collections).filter_by(**kwargs).all()
 
     def close_session(self):
         self.session.close()
