@@ -14,7 +14,7 @@ class ImportCSV:
         self.csv_file = self.config.get_insert_csv_file_path('csv')
 
     def insert(self, group_id: int, name: str) -> None:
-        data: pd.DataFrame = pd.read_csv(self.csv_file)
+        data: pd.DataFrame = pd.read_csv(self.csv_file, chunksize=10000000)
         group: Groups = self.database.get_or_create(
             Groups,
             id=group_id, name=name
