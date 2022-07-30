@@ -14,17 +14,18 @@ class ImportCSV:
         self.csv_file = self.config.get_insert_csv_file_path('csv')
 
     def insert(self, group_id: int, name: str) -> None:
-        data: pd.DataFrame = pd.read_csv(self.csv_file, chunksize=10000000)
+        data: pd.DataFrame = pd.read_csv(self.csv_file, chunksize=10000000, iterator=True).get_chunk()
         group: Groups = self.database.get_or_create(
             Groups,
             id=group_id, name=name
         )
+
         for index, row in data.iterrows():
             new_data_point: Collections = self.database.get_or_create(
                 model=Collections,
-                date=datetime.strptime(row['date'], "%Y-%m-%d").date(),
-                user_id=row['user_id'],
-                value=row['value'],
+                date=datetime.strptime(row[1], "%Y-%m-%d").date(),
+                user_id=row[0],
+                value=row[2],
                 group_id=group.id
             )
             self.database.add(new_data_point)
