@@ -32,8 +32,8 @@ class Configuration:
     def database_file_exists(self) -> bool:
         return os.path.exists(self.get_database_file_path())
 
-    def get_insert_csv_file_path(self) -> str:
-        return self.config['database']['insert_csv_path']
+    def get_insert_csv_file_path(self, file_type: str) -> str:
+        return self.config['insert'][file_type]
 
     @staticmethod
     def get_config_template_path() -> str:

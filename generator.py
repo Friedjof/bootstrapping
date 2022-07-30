@@ -15,7 +15,7 @@ class Generator:
         self.user_id_start: int = 10000
         self.start_date = datetime.date(1970, 1, 1)
         self.date_steps = datetime.timedelta(days=1)
-        self.value_range = [50, 60]
+        self.value_range = [0, 80]
         self.group_id = 2
 
     def generate_data(self):
