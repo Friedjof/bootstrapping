@@ -35,6 +35,9 @@ class Configuration:
     def get_insert_csv_file_path(self, file_type: str) -> str:
         return self.config['insert'][file_type]
 
+    def get_database_logging(self) -> bool:
+        return self.config.getboolean('logging', 'database_logging')
+
     @staticmethod
     def get_config_template_path() -> str:
         return "data/config/configuration.ini.template"
