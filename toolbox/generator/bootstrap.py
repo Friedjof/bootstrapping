@@ -42,7 +42,7 @@ class Bootstrap:
             for index, data in enumerate(sample):
                 print(data)
                 new_data_point = Collections(
-                    date=datetime.strptime(data[3], "%Y-%m-%d %H:%M:%S.%f"),
+                    date=datetime.strptime(data[3], "%Y-%m-%d").date(),
                     user_id=data[2],
                     value=data[4],
                     group_id=new_sample.id
