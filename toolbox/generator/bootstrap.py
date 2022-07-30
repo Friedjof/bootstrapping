@@ -4,7 +4,7 @@ from datetime import datetime
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
 
-from model.model import CollectedData, Groups
+from model.model import Collections, Groups
 
 
 class Bootstrap:
@@ -41,7 +41,7 @@ class Bootstrap:
             self.database.commit()
             for index, data in enumerate(sample):
                 print(data)
-                new_data_point = CollectedData(
+                new_data_point = Collections(
                     date=datetime.strptime(data[3], "%Y-%m-%d %H:%M:%S.%f"),
                     user_id=data[2],
                     value=data[4],
