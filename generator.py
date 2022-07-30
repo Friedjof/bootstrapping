@@ -20,7 +20,7 @@ class Generator:
 
     def generate_data(self):
         for u in range(10):
-            for d in range(10):
+            for d in range(1000):
                 date = self.start_date + d * self.date_steps
                 value = random.randint(self.value_range[0], self.value_range[1])
 

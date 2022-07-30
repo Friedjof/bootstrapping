@@ -28,4 +28,4 @@ class Collections(Base):
     value = sa.Column(sa.Integer)
 
     def __repr__(self):
-        return f'<CollectedData {", ".join([f"{v}" for v in self.__dict__.vales()])}>'
+        return f'<CollectedData {", ".join([f"{v}" for v in self.__dict__.values()][1:])}>'

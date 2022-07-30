@@ -1,5 +1,8 @@
 import random
 from datetime import datetime
+from scipy.stats import bootstrap
+
+import numpy as np
 
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
@@ -50,3 +53,21 @@ class Bootstrap:
                 self.database.add(new_data_point)
             self.database.commit()
         self.database.close()
+
+
+if __name__ == '__main__':
+    data = [7, 9, 10, 10, 12, 14, 15, 16, 16, 17, 19, 20, 21, 21, 23]
+
+    # convert array to sequence
+    data = (data,)
+
+    # calculate 95% bootstrapped confidence interval for median
+    bootstrap_ci = bootstrap(
+        data, np.median,
+        confidence_level=0.95,
+        random_state=1,
+        method='percentile'
+    )
+
+    # view 95% boostrapped confidence interval
+    print(bootstrap_ci.confidence_interval)
