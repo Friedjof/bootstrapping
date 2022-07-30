@@ -13,12 +13,12 @@ class Groups(Base):
         return f'<Groups(name={self.name}, description={self.description})>'
 
 
-class CollectedData(Base):
+class Collections(Base):
     """
     You may have to change this table if this table is not
     in the same format as the data you want to store.
     """
-    __tablename__ = 'collected_data'
+    __tablename__ = 'collections'
     id = sa.Column(sa.Integer, primary_key=True)
     group_id = sa.Column(sa.ForeignKey('groups.id'))
 
