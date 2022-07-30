@@ -37,6 +37,8 @@ class Configuration:
 
     def get_database_logging(self) -> bool:
         return self.config.getboolean('logging', 'database_logging')
+    def database_backup_file_exists(self) -> bool:
+        return os.path.exists(self.get_backup_database_file_path())
 
     @staticmethod
     def get_config_template_path() -> str:
