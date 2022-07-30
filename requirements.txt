@@ -1,1 +1,2 @@
 SQLAlchemy~=1.4.39
+pandas~=1.4.3

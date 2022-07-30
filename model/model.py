@@ -24,7 +24,7 @@ class Collections(Base):
 
     # here you can change the table format
     user_id = sa.Column(sa.Integer)
-    date = sa.Column(sa.DateTime)
+    date = sa.Column(sa.Date)
     value = sa.Column(sa.Integer)
 
     def __repr__(self):

@@ -21,7 +21,7 @@ class Configuration:
         return query_parser
 
     def get_database_path(self) -> str:
-        return self.config['database']['path']
+        return self.config['database']['running']
 
     def get_backup_database_file_path(self) -> str:
         return self.config['database']['backup_path']
@@ -32,6 +32,11 @@ class Configuration:
     def database_file_exists(self) -> bool:
         return os.path.exists(self.get_database_file_path())
 
+    def get_insert_csv_file_path(self, file_type: str) -> str:
+        return self.config['insert'][file_type]
+
+    def get_database_logging(self) -> bool:
+        return self.config.getboolean('logging', 'database_logging')
     def database_backup_file_exists(self) -> bool:
         return os.path.exists(self.get_backup_database_file_path())
 

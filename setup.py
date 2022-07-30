@@ -1,5 +1,6 @@
 import time
 import shutil
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
@@ -54,7 +55,7 @@ if __name__ == '__main__':
             print(">> you will lose all your data if you do so. (y/n)", end=": ")
             if input() == 'y':
                 print("deleting database file...", end="")
-                shutil.rmtree(configuration.get_database_file_path())
+                os.remove(configuration.get_database_file_path())
                 time.sleep(2)
                 print("done")
             else:

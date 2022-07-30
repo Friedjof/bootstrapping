@@ -1,21 +1,21 @@
 import random
 import datetime
 
-from model.model import CollectedData
+from model.model import Collections
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
 
 
-class DataGenerator:
+class Generator:
     def __init__(self):
         self.config = Configuration()
         self.database: Database = Database(self.config)
 
         # Script setup
         self.user_id_start: int = 10000
-        self.start_date = datetime.datetime(1970, 1, 1)
+        self.start_date = datetime.date(1970, 1, 1)
         self.date_steps = datetime.timedelta(days=1)
-        self.value_range = [50, 60]
+        self.value_range = [0, 80]
         self.group_id = 2
 
     def generate_data(self):
@@ -24,7 +24,7 @@ class DataGenerator:
                 date = self.start_date + d * self.date_steps
                 value = random.randint(self.value_range[0], self.value_range[1])
 
-                cd: CollectedData = CollectedData(
+                cd: Collections = Collections(
                     user_id=self.user_id_start + u,
                     date=date,
                     value=value,
@@ -42,5 +42,5 @@ class DataGenerator:
 
 
 if __name__ == '__main__':
-    data_generator = DataGenerator()
+    data_generator = Generator()
     data_generator.generate_data()
