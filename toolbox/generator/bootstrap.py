@@ -1,8 +1,6 @@
 import random
-from datetime import datetime
-from scipy.stats import bootstrap
-
-import numpy as np
+import time
+from datetime import datetime, timedelta
 
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
@@ -27,11 +25,14 @@ class Bootstrap:
         """
         Bootstrapping
         """
+        start_time: float = time.time()
         for i in range(nr_of_samples):
             temp_sample: list = []
             for j in range(len(self.org)):
                 temp_sample.append(random.choice(self.org))
             self.samples.append(temp_sample)
+            print(f"{i + 1}/{nr_of_samples}")
+        print(f"inserted {nr_of_samples} samples in {timedelta(seconds=(time.time() - start_time))}")
         return self.samples
 
     def save_samples(self) -> None:
@@ -42,32 +43,18 @@ class Bootstrap:
             )
             self.database.add(new_sample)
             self.database.commit()
+            start_time: float = time.time()
+            rows: list[dict] = []
             for index, data in enumerate(sample):
-                print(data)
-                new_data_point = Collections(
-                    date=datetime.strptime(data[3], "%Y-%m-%d").date(),
-                    user_id=data[2],
-                    value=data[4],
-                    group_id=new_sample.id
-                )
-                self.database.add(new_data_point)
+                rows.append({
+                    'group_id': new_sample.id,
+                    'user_id': data[2],
+                    'date': datetime.strptime(data[3], "%Y-%m-%d").date(),
+                    'value': data[4]
+                })
+                if index % 10000 == 0 and index != 0:
+                    print(f"inserted {index} rows")
+            self.database.session.bulk_insert_mappings(Collections, rows)
             self.database.commit()
+            print(f"inserted {len(rows)} rows in {timedelta(seconds=(time.time() - start_time))}")
         self.database.close()
-
-
-if __name__ == '__main__':
-    data = [7, 9, 10, 10, 12, 14, 15, 16, 16, 17, 19, 20, 21, 21, 23]
-
-    # convert array to sequence
-    data = (data,)
-
-    # calculate 95% bootstrapped confidence interval for median
-    bootstrap_ci = bootstrap(
-        data, np.median,
-        confidence_level=0.95,
-        random_state=1,
-        method='percentile'
-    )
-
-    # view 95% boostrapped confidence interval
-    print(bootstrap_ci.confidence_interval)
