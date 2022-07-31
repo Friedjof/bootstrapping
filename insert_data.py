@@ -42,6 +42,8 @@ class ImportCSV:
 
             if index % 1000 == 0 and index != 0:
                 print(f"inserted {index} rows")
+                self.database.session.bulk_insert_mappings(Collections, rows)
+                rows = []
 
         print(f"{len(rows)} rows are now buffered")
 
