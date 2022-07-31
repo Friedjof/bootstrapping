@@ -1,49 +1,29 @@
-import pandas as pd
-import sqlite3
-
-import plotly.express as px
 from causalimpact import CausalImpact
 
-from toolbox.serializer.samples import FinalAggregationSerializer
-from toolbox.query.query_manager import QueryManager
+from toolbox.analysis.causalimpact import Analyse
 from toolbox.configuration.config import Configuration
 
 
-class Analyse:
-    def __init__(self, configuration: Configuration) -> None:
-        self.configuration: Configuration = configuration
-
-        self.rows: FinalAggregationSerializer = FinalAggregationSerializer()
-        self.serialized_rows: pd.DataFrame = self.get_samples()
-
-    def get_samples(self) -> pd.DataFrame:
-        """
-        Get samples from the database.
-        """
-        connection = sqlite3.connect(self.configuration.get_database_file_path())
-        qm: QueryManager = QueryManager(connection=connection, configuration=self.configuration)
-
-        self.rows.deserialize(qm.get_result("final_aggregation"))
-
-        return self.rows.serialize()
-
-    def plot_samples(self) -> None:
-        """
-        Plot samples.
-        """
-        print(f"dataset size {self.serialized_rows}")
-
-        fig = px.line(self.serialized_rows, x="date", y="value", line_shape='spline')
-        fig.show()
-
-
 if __name__ == '__main__':
+    # create analysis object
     analysis: Analyse = Analyse(configuration=Configuration())
-    analysis.get_samples()
 
+    # customizable section
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # get all samples from the database
+    # you can set the sql command in the queries.py file
+    analysis.get_samples(sql_command="final_aggregation")
+
+    # serialize the samples
     print(analysis.serialized_rows)
 
-    ci = CausalImpact(analysis.serialized_rows, [0, 4], [5, 10])
+    # plot the samples
+    # you may have to change the pre_period and post_period
+    ci = CausalImpact(analysis.serialized_rows, pre_period=[0, 4], post_period=[5, 10])
+    # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    # print a report of the causal impact
     print(ci.summary())
     print(ci.summary(output='report'))
+    # visualize the causal impact
     ci.plot()

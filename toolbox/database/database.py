@@ -15,10 +15,13 @@ class Database:
         self.engine = create_engine(self.configuration.get_database_path(), echo=self.logging)
         self.session = sessionmaker(bind=self.engine)()
 
-    def add(self, obj):
+    def add(self, obj) -> None:
         self.session.add(obj)
 
-    def get_or_create(self, model, **kwargs):
+    def insert_rows(self, model: object, rows: list[dict]) -> None:
+        self.session.bulk_insert_mappings(model, rows)
+
+    def get_or_create(self, model, **kwargs) -> object:
         instance = self.session.query(model).filter_by(**kwargs).first()
         if instance:
             return instance
@@ -27,27 +30,24 @@ class Database:
             self.session.add(instance)
             return instance
 
-    def get_session(self):
+    def get_session(self) -> sessionmaker:
         return self.session
 
-    def get_samples(self, **kwargs):
+    def get_samples(self, **kwargs) -> list:
         return self.session.query(Collections).filter_by(**kwargs).all()
 
     def get_max_group_id(self) -> int:
         return self.session.query(func.max(Groups.id)).scalar() or 0
 
-    def close_session(self):
+    def close_session(self) -> None:
         self.session.close()
 
-    def commit(self):
+    def commit(self) -> None:
         self.session.commit()
 
-    def rollback(self):
+    def rollback(self) -> None:
         self.session.rollback()
 
-    def close(self):
+    def close(self) -> None:
         self.session.close()
         self.engine.dispose()
-
-    def __del__(self):
-        self.close()

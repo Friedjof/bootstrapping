@@ -21,6 +21,9 @@ class Bootstrap:
 
         self.database: Database = Database(self.config)
 
+    def set_original_data(self, org: list) -> None:
+        self.org = org
+
     def choice(self, nr_of_samples: int, output_size: int = None) -> list:
         """
         Bootstrapping
