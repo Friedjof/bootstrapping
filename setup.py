@@ -311,7 +311,7 @@ class ProjectCommand(Command, ABC):
             print("- Creating database file...", end="")
             Base.metadata.create_all(create_engine(self.configuration.get_database_path()))
             print("done.")
-            print("- This can also be done by typing 'database create'.")
+            print("  [TIPP] This can also be done by typing 'database create'.")
         else:
             print("- Database file exists.")
 
@@ -361,7 +361,6 @@ class ProjectCommand(Command, ABC):
         print("--------------------------------------------------------------------------------")
 
     def backup_dialog(self, *args) -> None:
-        # TODO: write the backup
         if len(args) == 0:
             print("[ERROR] No project backup path specified.")
             print("[TIPP] To create a backup of the project, type 'project backup <path>'.")
@@ -383,16 +382,26 @@ class ProjectCommand(Command, ABC):
                         print("[INFO] Backup file not overwritten.")
             else:
                 if os.path.exists(os.path.dirname(path)):
-                    self.generate_backup_file(path)
+                    if os.path.exists(path=path + ".zip"):
+                        print("[WARNING] The backup file already exists.")
+                        print("Would you like to overwrite it? (y/n)", end=" ")
+                        if input().lower() == "y":
+                            os.remove(path + ".zip")
+                            self.generate_backup_file(path=path)
+                            print("[INFO] Backup file overwritten.")
+                        else:
+                            print("[INFO] Backup file not overwritten.")
+                    else:
+                        self.generate_backup_file(path=path)
                 else:
                     print("[WARNING] The backup path does not exist.")
                     print("          Please specify a valid path.")
 
     def generate_backup_file(self, path: str) -> None:
-        print(f"[INFO] Creating backup file {path}...")
-
         if os.path.splitext(path)[1] != ".zip":
             path += ".zip"
+
+        print(f"[INFO] Creating backup file {path}...")
 
         with ZipFile(path, "w") as backup_file:
             for root, dirs, files in os.walk(self.configuration.get_database_directory_path()):
@@ -404,14 +413,37 @@ class ProjectCommand(Command, ABC):
                             self.configuration.get_database_directory_path().split("/")[0]
                         )
                     )
-            backup_file.write(os.path.abspath(self.configuration.get_query_path()), "query.ini")
+            backup_file.write(os.path.abspath(self.configuration.get_query_path()), "queries.ini")
             backup_file.write(os.path.abspath(self.configuration.get_config_path()), "configuration.ini")
 
-    def restore_dialog(self, *args) -> None:
-        pass
+        print(f"[INFO] Backup file {path} created.")
+        print(f"[TIPP] To restore the backup, type 'project restore {path}'.")
 
-    def restore_backup(self, path: str) -> None:
-        pass
+    def restore_dialog(self, *args) -> None:
+        if len(args) == 0:
+            print("[ERROR] No project backup path specified.")
+            print("[TIPP] To restore a backup of the project, type 'project restore <path>'.")
+        else:
+            path: str = args[0]
+
+            if os.path.isfile(path):
+                self.restore_backup_file(path)
+            else:
+                print("[WARNING] The backup file does not exist.")
+                print("          Please specify a valid path.")
+
+    def restore_backup_file(self, path: str) -> None:
+        print(f"[INFO] Restoring backup file {path}...")
+
+        with ZipFile(path, "r") as backup_file:
+            for file in backup_file.namelist():
+                print(f"[DEBUG] Extracting {file}...")
+                if file == 'queries.ini':
+                    backup_file.extract(file, self.configuration.get_config_directory_path())
+                elif file == 'configuration.ini':
+                    backup_file.extract(file, self.configuration.get_config_directory_path())
+                else:
+                    backup_file.extract(file, self.configuration.get_data_directory_path())
 
     def rebuild_project(self) -> None:
         # TODO: write the rebuild

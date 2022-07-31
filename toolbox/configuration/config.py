@@ -74,6 +74,14 @@ class Configuration:
         return "data/database"
 
     @staticmethod
+    def get_data_directory_path() -> str:
+        """
+        Get the path to the data directory.
+        :return: data directory path
+        """
+        return "data/"
+
+    @staticmethod
     def get_query_file_path() -> str:
         """
         Get the path to the query file.
@@ -89,6 +97,14 @@ class Configuration:
         :return: query template path
         """
         return "data/config/queries.ini.template"
+
+    @staticmethod
+    def get_config_directory_path() -> str:
+        """
+        Get the path to the configuration directory.
+        :return: configuration directory path
+        """
+        return "data/config"
 
     @staticmethod
     def config_file_exists() -> bool:
