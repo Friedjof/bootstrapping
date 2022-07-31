@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # customizable section
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # get the peer group dataset
-    # you can set the sql command in the queries.py file
+    # you can set the sql command in the queries.ini file
     bootstrap.set_original_data(query_manager.get_result(query_name="peer_group"))
 
     # generate the bootstrap samples
