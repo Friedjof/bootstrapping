@@ -16,6 +16,6 @@ if __name__ == '__main__':
     bootstrap.org = query_manager.get_result("peer_group")
 
     bootstrap.choice(nr_of_samples=10)
-    bootstrap.save_samples()
+    bootstrap.save_samples(sample_start_id=1)
 
     print("I am done.")

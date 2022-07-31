@@ -138,3 +138,6 @@ data/database/*
 
 # Configuration
 *.ini
+
+# Scripts
+script-*.py

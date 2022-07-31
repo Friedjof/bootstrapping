@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func
 
 from model.model import Collections, Groups
 from toolbox.configuration.config import Configuration
@@ -31,6 +32,9 @@ class Database:
 
     def get_samples(self, **kwargs):
         return self.session.query(Collections).filter_by(**kwargs).all()
+
+    def get_max_group_id(self) -> int:
+        return self.session.query(func.max(Groups.id)).scalar() or 0
 
     def close_session(self):
         self.session.close()

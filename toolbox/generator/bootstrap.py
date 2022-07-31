@@ -21,28 +21,34 @@ class Bootstrap:
 
         self.database: Database = Database(self.config)
 
-    def choice(self, nr_of_samples: int) -> list:
+    def choice(self, nr_of_samples: int, output_size: int = None) -> list:
         """
         Bootstrapping
         """
+        if output_size is None:
+            output_size = len(self.org)
+
         start_time: float = time.time()
         for i in range(nr_of_samples):
             temp_sample: list = []
-            for j in range(len(self.org)):
+            for j in range(output_size):
                 temp_sample.append(random.choice(self.org))
             self.samples.append(temp_sample)
-            print(f"{i + 1}/{nr_of_samples}")
+            print(f"created {i + 1}/{nr_of_samples} samples in {timedelta(seconds=(time.time() - start_time))}")
         print(f"inserted {nr_of_samples} samples in {timedelta(seconds=(time.time() - start_time))}")
         return self.samples
 
-    def save_samples(self) -> None:
+    def save_samples(self, sample_start_id: int = None) -> None:
+        if sample_start_id is None:
+            sample_start_id = self.database.get_max_group_id() + 1
+
+        total_time_start: float = time.time()
         for sample_id, sample in enumerate(self.samples):
             new_sample: Groups = Groups(
-                id=sample_id + 3,
+                id=sample_id + sample_start_id,
                 name=f"Sample {sample_id + 1}",
             )
-            self.database.add(new_sample)
-            self.database.commit()
+            self.database.get_or_create(new_sample)
             start_time: float = time.time()
             rows: list[dict] = []
             for index, data in enumerate(sample):
@@ -57,4 +63,5 @@ class Bootstrap:
             self.database.session.bulk_insert_mappings(Collections, rows)
             self.database.commit()
             print(f"inserted {len(rows)} rows in {timedelta(seconds=(time.time() - start_time))}")
+        print(f"inserted {len(self.samples)} samples in {timedelta(seconds=(time.time() - total_time_start))}")
         self.database.close()
