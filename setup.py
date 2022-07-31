@@ -1,4 +1,3 @@
-import time
 import shutil
 import os
 from abc import ABC
@@ -22,6 +21,14 @@ class AbstractKeyword:
     SHOW: str = "show"
     HELP: str = "help"
     EXIT: str = "exit"
+    BACKUP: str = "backup"
+    RESTORE: str = "restore"
+    INFO: str = "info"
+    GUIDE: str = "guide"
+    REBUILD: str = "rebuild"
+    SETUP: str = "setup"
+    F: str = "f"
+    FILE: str = "file"
 
 
 class Command:
@@ -41,6 +48,9 @@ class Command:
 
     def help(self) -> None:
         print(f"This is the description of the command: {self.description}")
+
+    def info(self) -> None:
+        print("This function shows more information about the repository.")
 
     def __repr__(self):
         return f"<Command: {self.name}>"
@@ -119,22 +129,90 @@ class DatabaseCommand(Command):
         super().__init__(cm, "database", "Database commands")
 
     def execute(self, *args) -> None:
+        if len(args) == 0:
+            print("[ERROR] You need to specify a command.")
+            self.help()
+        else:
+            command: str = args[0]
+            if command == AbstractKeyword.CREATE:
+                self.create()
+            elif command == AbstractKeyword.DELETE:
+                self.delete(*args[1:] if len(args) > 1 else [])
+            elif command == AbstractKeyword.BACKUP:
+                self.backup()
+            elif command == AbstractKeyword.RESTORE:
+                self.restore()
+            elif command == AbstractKeyword.INFO:
+                self.info()
+            else:
+                print(f"[ERROR] Command '{command}' not found.")
+                self.help()
+
+    def create(self) -> None:
+        print("[INFO] Creating database...", end="")
+        Base.metadata.create_all(create_engine(self.configuration.get_database_path()))
+        print("done.")
+
+    def delete(self, *args) -> None:
+        if len(args) == 0:
+            print("[INFO] Deleting database...")
+            engine: Engine = create_engine(self.configuration.get_database_file_path())
+            Base.metadata.drop_all(engine)
+            print("[INFO] Database deleted.")
+        elif len(args) > 0:
+            if args[0] == AbstractKeyword.F or args[0] == AbstractKeyword.FILE:
+                print("[INFO] Deleting database...")
+                os.remove(self.configuration.get_database_file_path())
+                print("[INFO] Database deleted.")
+            else:
+                print("[ERROR] Invalid argument.")
+                self.help()
+
+    def backup(self) -> None:
+        if self.configuration.database_file_exists():
+            print("[INFO] Backing up database...")
+            shutil.copy(self.configuration.get_database_file_path(), self.configuration.get_backup_database_file_path())
+            print("[INFO] Database backed up.")
+        else:
+            print("[ERROR] Database file not found.")
+            if self.configuration.database_backup_file_exists():
+                print("[INFO] You can restore the database by typing 'database restore'.")
+            else:
+                print("there is also no restore database file.")
+                print("[INFO] You can create the database by typing 'database create'.")
         print("--------------------------------------------------------------------------------")
-        print("Database commands:")
-        print("- create: Create database")
-        print("- drop: Drop database")
+
+    def restore(self) -> None:
+        if self.configuration.database_backup_file_exists():
+            print("[INFO] Restoring database...")
+            shutil.copy(self.configuration.get_backup_database_file_path(), self.configuration.get_database_file_path())
+            print("[INFO] Database restored.")
+        else:
+            print("[ERROR] Database backup file not found.")
+            if self.configuration.database_file_exists():
+                print("[INFO] You can backup the database by typing 'database backup'.")
+            else:
+                print("There is also no database file to restore.")
+                print("[INFO] The backup path can be specified in the configuration file.")
+                print("[INFO] You also can create the database by typing 'database create'.")
         print("--------------------------------------------------------------------------------")
-        rebuild_configuration_file_dialog()
-        self.cm.run_command(InputParser(input(), self.cm.commands))
 
     def help(self) -> None:
         print("--------------------------------------------------------------------------------")
         print("Database commands:")
-        print("- create: Create database")
-        print("- drop: Drop database")
-        print("- backup: Backup database")
-        print("- reload: Reload database")
+        print("- create: Create the database with the given model")
+        print("- backup: Backup the database to the backup path in the configuration file")
+        print("- restore: Reload the database from the backup path in the configuration file")
+        print("- delete [f or file]: Delete the database.")
+        print("  If 'f' or 'file' is specified, the database file will be deleted.")
+        print("- info: Show information about the database management in this project.")
         print("--------------------------------------------------------------------------------")
+        print(">> Note: all databases will not be versioned.")
+        print("--------------------------------------------------------------------------------")
+
+    def info(self) -> None:
+        # TODO: implement info about storing the database and other stuff
+        print("Not implemented yet.")
 
 
 class ConfigurationCommand(Command, ABC):
@@ -160,33 +238,139 @@ class ConfigurationCommand(Command, ABC):
         print("--------------------------------------------------------------------------------")
 
 
-class BackupCommand(Command):
+class ProjectCommand(Command, ABC):
     def __init__(self, cm: CommandManager, configuration: Configuration):
+        super().__init__(cm, "project", "Project commands")
         self.configuration: Configuration = configuration
-        super().__init__(cm, "backup", "Backup all your data from this project in a zip file")
 
     def execute(self, *args) -> None:
         if len(args) == 0:
             self.help()
         else:
             command: InputParser = InputParser(args[0])
-            if command.name == AbstractKeyword.CREATE:
-                if len(args) == 1:
-                    print("Please specify a path for the backup.")
-                else:
-                    self.create_backup(path=args[1])
+            if command.name == AbstractKeyword.GUIDE:
+                self.start_guide()
+            elif command.name == AbstractKeyword.SETUP:
+                self.start_setup()
+            elif command.name == AbstractKeyword.BACKUP:
+                self.backup(*args[1:] if len(args) > 1 else [])
+            elif command.name == AbstractKeyword.RESTORE:
+                self.restore(*args[1:] if len(args) > 1 else [])
+            elif command.name == AbstractKeyword.REBUILD:
+                self.rebuild_project()
+            elif command.name == AbstractKeyword.INFO:
+                self.info()
             else:
                 print(f"Command '{command.name}' not found.")
 
-    def help(self) -> None:
+    def start_guide(self) -> None:
+        # TODO: write the guide
+        pass
+
+    def start_setup(self) -> None:
+        print("[INFO] Setting up project...")
+        # This is the checklist for the setup:
+        # TODO: programm a configuration or project validator
+        # Database check:
+        database_directory_exists: bool = self.configuration.database_directory_exists()
+        database_file_exists: bool = self.configuration.database_file_exists()
+        database_backup_file_exists: bool = self.configuration.database_backup_file_exists()
+
+        # Configuration check:
+        configuration_file_exists: bool = self.configuration.config_file_exists()
+        configuration_template_file_exists: bool = self.configuration.config_template_exists()
+
+        # Query check:
+        query_file_exists: bool = self.configuration.query_file_exists()
+        query_template_file_exists: bool = self.configuration.query_template_exists()
+
         print("--------------------------------------------------------------------------------")
-        print("The backup command has the following subcommands:")
-        print("- create: backups all your data from this project")
+        print("[INFO] Checking database...")
+        if not database_directory_exists:
+            print("- Creating database directory...", end="")
+            os.mkdir(self.configuration.get_database_directory_path())
+            print("done.")
+        else:
+            print("- Database directory exists.")
+
+        if not database_file_exists:
+            print("- Creating database file...", end="")
+            Base.metadata.create_all(create_engine(self.configuration.get_database_path()))
+            print("done.")
+            print("- This can also be done by typing 'database create'.")
+        else:
+            print("- Database file exists.")
+
+        if not database_backup_file_exists:
+            print("- [INFO] There is no database backup in the database directory.")
+            print("  [TIPP] To create a backup of the database, type 'database backup'.")
+        else:
+            print("- [INFO] Database backup file exists.")
+
+        print("--------------------------------------------------------------------------------")
+        print("[INFO] Checking configuration...")
+        if not configuration_file_exists:
+            if not configuration_template_file_exists:
+                print("[ERROR] Configuration template file not found.")
+                print("The project can not run without a configuration file.")
+                print("TIPP:")
+                print("1. download the configuration file from the github repository.")
+                print("2. move the file into the project directory data/config/.")
+                print("3. then run the project setup again.")
+            else:
+                print("- Creating configuration file...", end="")
+                self.configuration.reset_configuration_file()
+                print("done.")
+                print("  [TIPP] To learn more about the configuration file, type 'help configuration'.")
+        else:
+            print("- Configuration file exists.")
+
+        print("--------------------------------------------------------------------------------")
+        print("[INFO] Checking queries...")
+        if not query_file_exists:
+            if not query_template_file_exists:
+                print("[ERROR] Query template file not found.")
+                print("The project can not run without a query file.")
+                print("TIPP:")
+                print("1. download the query file from the github repository.")
+                print("2. move the file into the project directory data/config/.")
+                print("3. then run the project setup again.")
+            else:
+                print("- Creating query file...", end="")
+                self.configuration.reset_query_file()
+                print("done.")
+                print("  [TIPP] To learn more about the query file, type 'help query'.")
+        else:
+            print("- Query file exists.")
+
+        print("SETUP FINISHED SUCCESSFULLY.")
         print("--------------------------------------------------------------------------------")
 
-    def create_backup(self, path) -> None:
-        # TODO: create backup
+    def backup(self, *args) -> None:
+        # TODO: write the backup
         pass
+
+    def restore(self, *args) -> None:
+        # TODO: write the restore
+        pass
+
+    def rebuild_project(self) -> None:
+        # TODO: write the rebuild
+        pass
+
+    def help(self) -> None:
+        print("--------------------------------------------------------------------------------")
+        print("Project commands:")
+        print("- guide: Show the guide for this project.")
+        print("- setup: With this command you can setup the project.")
+        print("- backup [path]: zip all your specific files and put them in the given path.")
+        print("- restore [path]: restore the project from the given path.")
+        print("- rebuild: Rebuild this project. THIS WILL CLEANUP ALL SPECIFIED FILES!")
+        print("- info: Show information about the project structure.")
+        print("  You can also read the README.md file for all information.")
+        print("--------------------------------------------------------------------------------")
+        print(">> Note: all projects will not be versioned.")
+        print("--------------------------------------------------------------------------------")
 
 
 class InitializeProject:
@@ -210,7 +394,7 @@ class InitializeProject:
         self.command_manager.add_command(
             ConfigurationCommand(self.command_manager, self.configuration))
         self.command_manager.add_command(
-            BackupCommand(self.command_manager, self.configuration))
+            ProjectCommand(self.command_manager, self.configuration))
 
     def start_console(self):
         self.log_welcome()
@@ -242,6 +426,12 @@ class InitializeProject:
         print("| Type 'exit' to exit the shell.                                               |")
         print("| Type 'help' to get a list of available commands.                             |")
         print("+------------------------------------------------------------------------------+")
+        print("| If you are running this project for the FIRST TIME, you should run the       |")
+        print("| 'project setup' command to create important files.                           |")
+        print("+------------------------------------------------------------------------------+")
+        print("| More information can be found in the README.md file or with the command      |")
+        print("| 'project guide'.                                                             |")
+        print("+------------------------------------------------------------------------------+")
 
     @staticmethod
     def log_database_does_not_exist():
@@ -253,17 +443,6 @@ class InitializeProject:
     @staticmethod
     def console_read(prompt: str = "$ ") -> str:
         return input(f"[project shell]{prompt}")
-
-
-def rebuild_configuration_file_dialog():
-    if input() == 'y':
-        print("creating configuration file...", end="")
-        shutil.copy(Configuration.get_config_template_path(), Configuration.get_config_path())
-        time.sleep(2)
-        print("done")
-    else:
-        print("rebuild configuration file canceled")
-        print("-----------------------------------------------------")
 
 
 if __name__ == '__main__':
