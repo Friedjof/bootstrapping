@@ -1,5 +1,6 @@
 import os
 import configparser
+import shutil
 
 
 class Configuration:
@@ -42,13 +43,44 @@ class Configuration:
         return os.path.exists(self.get_backup_database_file_path())
 
     @staticmethod
+    def reset_configuration_file() -> None:
+        """
+        Reset the configuration file.
+        """
+        shutil.copy(Configuration.get_config_template_path(), Configuration.get_config_path())
+
+    @staticmethod
     def get_config_template_path() -> str:
+        """
+        Get the path to the configuration template.
+        :return: configuration template path
+        """
         return "data/config/configuration.ini.template"
 
     @staticmethod
     def get_config_path() -> str:
+        """
+        Get the path to the configuration file.
+        :return: configuration file path
+        """
         return "data/config/configuration.ini"
 
     @staticmethod
     def config_file_exists() -> bool:
+        """
+        Check if the configuration file exists.
+        :return: true if the configuration file exists, false otherwise
+        """
         return os.path.exists(Configuration.get_config_path())
+
+    @staticmethod
+    def config_template_exists() -> bool:
+        """
+        Check if the configuration template exists.
+        :return: true if the configuration template exists, false otherwise
+        """
+        return os.path.exists(Configuration.get_config_template_path())
+
+    @staticmethod
+    def setup_is_valid() -> bool:
+        return Configuration.config_file_exists() and Configuration.config_template_exists()
