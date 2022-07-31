@@ -1,6 +1,8 @@
-import shutil
 import os
 from abc import ABC
+from datetime import datetime
+import shutil
+from zipfile import ZipFile
 
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
@@ -133,17 +135,19 @@ class DatabaseCommand(Command):
             print("[ERROR] You need to specify a command.")
             self.help()
         else:
-            command: str = args[0]
+            command: InputParser = InputParser(args[0])
             if command == AbstractKeyword.CREATE:
                 self.create()
-            elif command == AbstractKeyword.DELETE:
+            elif command.name == AbstractKeyword.DELETE:
                 self.delete(*args[1:] if len(args) > 1 else [])
-            elif command == AbstractKeyword.BACKUP:
+            elif command.name == AbstractKeyword.BACKUP:
                 self.backup()
-            elif command == AbstractKeyword.RESTORE:
+            elif command.name == AbstractKeyword.RESTORE:
                 self.restore()
-            elif command == AbstractKeyword.INFO:
+            elif command.name == AbstractKeyword.INFO:
                 self.info()
+            elif command.name == AbstractKeyword.REBUILD:
+                self.rebuild()
             else:
                 print(f"[ERROR] Command '{command}' not found.")
                 self.help()
@@ -161,9 +165,14 @@ class DatabaseCommand(Command):
             print("[INFO] Database deleted.")
         elif len(args) > 0:
             if args[0] == AbstractKeyword.F or args[0] == AbstractKeyword.FILE:
-                print("[INFO] Deleting database...")
-                os.remove(self.configuration.get_database_file_path())
-                print("[INFO] Database deleted.")
+                if self.configuration.database_file_exists():
+                    print("[INFO] Deleting database...")
+                    os.remove(self.configuration.get_database_file_path())
+                    print("[INFO] Database deleted.")
+                    print("[TIPP] You can now create a new database with the command 'database create'.")
+                else:
+                    print("[ERROR] Database file does not exist.")
+                    print("[TIPP] You can create a new database with the command 'database create'.")
             else:
                 print("[ERROR] Invalid argument.")
                 self.help()
@@ -197,12 +206,17 @@ class DatabaseCommand(Command):
                 print("[INFO] You also can create the database by typing 'database create'.")
         print("--------------------------------------------------------------------------------")
 
+    def rebuild(self) -> None:
+        self.delete(AbstractKeyword.FILE)
+        self.create()
+
     def help(self) -> None:
         print("--------------------------------------------------------------------------------")
         print("Database commands:")
         print("- create: Create the database with the given model")
         print("- backup: Backup the database to the backup path in the configuration file")
         print("- restore: Reload the database from the backup path in the configuration file")
+        print("- rebuild: Delete the database and create a new one")
         print("- delete [f or file]: Delete the database.")
         print("  If 'f' or 'file' is specified, the database file will be deleted.")
         print("- info: Show information about the database management in this project.")
@@ -253,9 +267,9 @@ class ProjectCommand(Command, ABC):
             elif command.name == AbstractKeyword.SETUP:
                 self.start_setup()
             elif command.name == AbstractKeyword.BACKUP:
-                self.backup(*args[1:] if len(args) > 1 else [])
+                self.backup_dialog(*args[1:] if len(args) > 1 else [])
             elif command.name == AbstractKeyword.RESTORE:
-                self.restore(*args[1:] if len(args) > 1 else [])
+                self.restore_dialog(*args[1:] if len(args) > 1 else [])
             elif command.name == AbstractKeyword.REBUILD:
                 self.rebuild_project()
             elif command.name == AbstractKeyword.INFO:
@@ -346,12 +360,57 @@ class ProjectCommand(Command, ABC):
         print("SETUP FINISHED SUCCESSFULLY.")
         print("--------------------------------------------------------------------------------")
 
-    def backup(self, *args) -> None:
+    def backup_dialog(self, *args) -> None:
         # TODO: write the backup
+        if len(args) == 0:
+            print("[ERROR] No project backup path specified.")
+            print("[TIPP] To create a backup of the project, type 'project backup <path>'.")
+        else:
+            path: str = args[0]
+
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    filename: str = f"project-backup_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}.zip"
+                    self.generate_backup_file(path=os.path.join(path, filename))
+                elif os.path.isfile(path):
+                    print("[WARNING] The backup file already exists.")
+                    print("Would you like to overwrite it? (y/n)", end=" ")
+                    if input().lower() == "y":
+                        os.remove(path)
+                        self.generate_backup_file(path=path)
+                        print("[INFO] Backup file overwritten.")
+                    else:
+                        print("[INFO] Backup file not overwritten.")
+            else:
+                if os.path.exists(os.path.dirname(path)):
+                    self.generate_backup_file(path)
+                else:
+                    print("[WARNING] The backup path does not exist.")
+                    print("          Please specify a valid path.")
+
+    def generate_backup_file(self, path: str) -> None:
+        print(f"[INFO] Creating backup file {path}...")
+
+        if os.path.splitext(path)[1] != ".zip":
+            path += ".zip"
+
+        with ZipFile(path, "w") as backup_file:
+            for root, dirs, files in os.walk(self.configuration.get_database_directory_path()):
+                for file in files:
+                    backup_file.write(
+                        os.path.join(root, file),
+                        os.path.relpath(
+                            os.path.join(root, file),
+                            self.configuration.get_database_directory_path().split("/")[0]
+                        )
+                    )
+            backup_file.write(os.path.abspath(self.configuration.get_query_path()), "query.ini")
+            backup_file.write(os.path.abspath(self.configuration.get_config_path()), "configuration.ini")
+
+    def restore_dialog(self, *args) -> None:
         pass
 
-    def restore(self, *args) -> None:
-        # TODO: write the restore
+    def restore_backup(self, path: str) -> None:
         pass
 
     def rebuild_project(self) -> None:
