@@ -48,7 +48,7 @@ class Bootstrap:
                 id=sample_id + sample_start_id,
                 name=f"Sample {sample_id + 1}",
             )
-            self.database.get_or_create(new_sample)
+            self.database.get_or_create(model=Groups, id=new_sample.id, name=new_sample.name)
             start_time: float = time.time()
             rows: list[dict] = []
             for index, data in enumerate(sample):
