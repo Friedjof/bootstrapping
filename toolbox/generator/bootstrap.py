@@ -44,17 +44,24 @@ class Bootstrap:
         return self.samples
 
     def join_users(self) -> None:
+        print("joining users")
+        start_time: float = time.time()
+
         new_samples: list[list] = []
         for index, sample in enumerate(self.samples):
             new_sample: list = []
-            for data in sample:
+            for i, data in enumerate(sample):
                 user_id: int = data[0]
                 result: list = self.query_manager.get_result('join_users_to_dataset', user_id)
                 for row in result:
                     new_sample.append((row[0], index, row[2], row[3], row[4]))
+
             new_samples.append(new_sample)
+
             print(f"joined {index + 1}/{len(self.samples)} samples")
+
         self.samples = new_samples
+        print(f"joined {len(self.samples)} samples in {timedelta(seconds=(time.time() - start_time))}")
 
     def save_samples(self, sample_start_id: int = None) -> None:
         if sample_start_id is None:
