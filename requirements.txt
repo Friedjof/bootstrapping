@@ -1,0 +1,5 @@
+SQLAlchemy~=1.4.39
+pandas~=1.4.3
+numpy==1.23.1
+scipy==1.9.0
+plotly~=5.9.0

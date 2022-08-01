@@ -1,0 +1,18 @@
+[queries]
+final_aggregation =
+    SELECT DISTINCT
+        cd.date,
+        cd.group_id,
+        sum(cd.value)
+    FROM collections cd
+    WHERE cd.group_id = 3
+    GROUP BY 1, 2
+
+distinct_users =
+    SELECT DISTINCT cd.user_id
+    FROM collections cd
+    ORDER
+
+all_data = SELECT * FROM collections
+
+data_as_bootstrap_sample = SELECT * FROM collections WHERE group_id = 1
