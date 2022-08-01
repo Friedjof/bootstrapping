@@ -16,4 +16,6 @@ if __name__ == '__main__':
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # generate data
-    data_generator.generate_data()
+    data_generator.generate_data(
+        users=100, days_per_user=100
+    )

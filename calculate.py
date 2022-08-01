@@ -21,11 +21,18 @@ if __name__ == '__main__':
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # get the peer group dataset
     # you can set the sql command in the queries.ini file
-    bootstrap.set_original_data(query_manager.get_result(query_name="peer_group"))
+    bootstrap.set_original_dataset(
+        dataset=query_manager.get_result(
+            query_name="data_as_bootstrap_sample"
+        )
+    )
 
     # generate the bootstrap samples
     # here you can set the number of samples you want to generate
     bootstrap.choice(nr_of_samples=10)
+
+    # use the selected users to generate the bootstrap samples
+    bootstrap.join_users()
     # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     # save the bootstrap samples

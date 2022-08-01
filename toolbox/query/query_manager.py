@@ -13,7 +13,7 @@ class QueryManager:
 
         self.space_name: str = "queries"
 
-    def get_result(self, query_name: str) -> list:
+    def get_result(self, query_name: str, *args) -> list:
         cursor = self.connection.cursor()
-        cursor.execute(self.query_parser[self.space_name][query_name])
+        cursor.execute(self.query_parser[self.space_name][query_name], args)
         return cursor.fetchall()

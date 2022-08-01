@@ -23,12 +23,12 @@ class Generator:
         self.value_range = value_range
         self.group_id = group_id
 
-    def generate_data(self, nr_of_users: int = 100, nr_of_day_per_user: int = 100):
+    def generate_data(self, users: int = 100, days_per_user: int = 100):
         total_start_time = time.time()
-        for u in range(nr_of_users):
+        for u in range(users):
             start_time = time.time()
             rows: list[dict] = []
-            for d in range(nr_of_day_per_user):
+            for d in range(days_per_user):
                 date = self.start_date + d * self.date_steps
                 value = random.randint(self.value_range[0], self.value_range[1])
 
@@ -40,7 +40,7 @@ class Generator:
                 ))
 
             self.database.insert_rows(Collections, rows)
-            print(f"inserted {u + 1}/{nr_of_users} users in {datetime.timedelta(seconds=(time.time() - start_time))}")
+            print(f"inserted {u + 1}/{users} users in {datetime.timedelta(seconds=(time.time() - start_time))}")
 
         self.database.commit()
         print(f"Total time: {time.time() - total_start_time}")

@@ -1,3 +1,5 @@
+import sqlite3
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
@@ -51,3 +53,6 @@ class Database:
     def close(self) -> None:
         self.session.close()
         self.engine.dispose()
+
+    def get_sqlite3_session(self) -> sqlite3.Connection:
+        return sqlite3.connect(self.configuration.get_database_file_path())
