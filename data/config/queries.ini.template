@@ -15,4 +15,4 @@ distinct_users =
 
 all_data = SELECT * FROM collections
 
-peer_group = SELECT * FROM collections WHERE group_id = 1
+data_as_bootstrap_sample = SELECT * FROM collections WHERE group_id = 1

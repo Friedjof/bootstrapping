@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from toolbox.configuration.config import Configuration
 from toolbox.database.database import Database
+from toolbox.query.query_manager import QueryManager
 
 from model.model import Collections, Groups
 
@@ -11,35 +12,49 @@ from model.model import Collections, Groups
 class Bootstrap:
     def __init__(self, config, org: list | None = None) -> None:
         if org is None:
-            self.org: list = []
+            self.dataset: list = []
         else:
-            self.org: list = org
+            self.dataset: list = org
 
         self.config: Configuration = config
 
         self.samples: list = []
 
         self.database: Database = Database(self.config)
+        self.query_manager: QueryManager = QueryManager(self.database.get_sqlite3_session(), self.config)
 
-    def set_original_data(self, org: list) -> None:
-        self.org = org
+    def set_original_dataset(self, dataset: list) -> None:
+        self.dataset = dataset
 
     def choice(self, nr_of_samples: int, output_size: int = None) -> list:
         """
         Bootstrapping
         """
         if output_size is None:
-            output_size = len(self.org)
+            output_size = len(self.dataset)
 
         start_time: float = time.time()
         for i in range(nr_of_samples):
             temp_sample: list = []
             for j in range(output_size):
-                temp_sample.append(random.choice(self.org))
+                temp_sample.append(random.choice(self.dataset))
             self.samples.append(temp_sample)
             print(f"created {i + 1}/{nr_of_samples} samples in {timedelta(seconds=(time.time() - start_time))}")
         print(f"inserted {nr_of_samples} samples in {timedelta(seconds=(time.time() - start_time))}")
         return self.samples
+
+    def join_users(self) -> None:
+        new_samples: list[list] = []
+        for index, sample in enumerate(self.samples):
+            new_sample: list = []
+            for data in sample:
+                user_id: int = data[0]
+                result: list = self.query_manager.get_result('join_users_to_dataset', user_id)
+                for row in result:
+                    new_sample.append((row[0], index, row[2], row[3], row[4]))
+            new_samples.append(new_sample)
+            print(f"joined {index + 1}/{len(self.samples)} samples")
+        self.samples = new_samples
 
     def save_samples(self, sample_start_id: int = None) -> None:
         if sample_start_id is None:
