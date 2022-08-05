@@ -2,8 +2,8 @@ import random
 import datetime
 import time
 
-from toolbox.configuration.config import Configuration
-from toolbox.database.database import Database
+from modules.config import Configuration
+from adapter.database.database import Database
 from model.model import Collections
 
 

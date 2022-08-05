@@ -2,9 +2,9 @@ import random
 import time
 from datetime import datetime, timedelta
 
-from toolbox.configuration.config import Configuration
-from toolbox.database.database import Database
-from toolbox.query.query_manager import QueryManager
+from modules.config import Configuration
+from adapter.database.database import Database
+from adapter.query.query_manager import QueryManager
 
 from model.model import Collections, Groups
 

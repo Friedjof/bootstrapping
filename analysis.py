@@ -1,7 +1,7 @@
 from causalimpact import CausalImpact
 
-from toolbox.analysis.causalimpact import Analyse
-from toolbox.configuration.config import Configuration
+from adapter.analysis.causalimpact import Analyse
+from modules.config import Configuration
 
 
 if __name__ == '__main__':

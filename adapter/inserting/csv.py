@@ -4,8 +4,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from model.model import Collections, Groups
-from toolbox.configuration.config import Configuration
-from toolbox.database.database import Database
+from modules.config import Configuration
+from adapter.database.database import Database
 
 
 class ImportCSV:

@@ -1,8 +1,8 @@
 import sqlite3
 
-from toolbox.generator.bootstrap import Bootstrap
-from toolbox.configuration.config import Configuration
-from toolbox.query.query_manager import QueryManager
+from adapter.generator.bootstrap import Bootstrap
+from modules.config import Configuration
+from adapter.query.query_manager import QueryManager
 
 
 if __name__ == '__main__':

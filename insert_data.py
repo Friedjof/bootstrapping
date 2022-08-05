@@ -1,4 +1,4 @@
-from toolbox.inserting.csv import ImportCSV
+from adapter.inserting.csv import ImportCSV
 
 
 if __name__ == '__main__':

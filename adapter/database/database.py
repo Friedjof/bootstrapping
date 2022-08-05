@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import func
 
 from model.model import Collections, Groups
-from toolbox.configuration.config import Configuration
+from modules.config import Configuration
 
 
 class Database:
