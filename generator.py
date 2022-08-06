@@ -1,6 +1,6 @@
 import datetime
 
-from toolbox.generator.generate_testdata import Generator
+from adapter.generator.generate_testdata import Generator
 
 
 if __name__ == '__main__':
