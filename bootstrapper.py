@@ -1,8 +1,8 @@
 import sqlite3
 
 from adapter.generator.bootstrap import Bootstrap
-from modules.config import Configuration
-from adapter.query.query_manager import QueryManager
+from modules.configuration import Configuration
+from modules.queryManager import QueryManager
 
 
 if __name__ == '__main__':
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     connection = sqlite3.connect(config.get_database_file_path())
 
     # creating query manager
-    query_manager: QueryManager = QueryManager(connection, config)
+    query_manager: QueryManager = QueryManager(config, connection=connection)
     # creating bootstrap object
     bootstrap: Bootstrap = Bootstrap(config=config)
 

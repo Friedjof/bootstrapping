@@ -1,4 +1,5 @@
 class AbstractKeyword:
+    SAMPLES: str = "samples"
     CREATE: str = "create"
     INSERT: str = "insert"
     DROP: str = "drop"

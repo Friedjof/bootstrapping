@@ -2,7 +2,7 @@ import random
 import datetime
 import time
 
-from modules.config import Configuration
+from modules.configuration import Configuration
 from adapter.database.database import Database
 from model.model import Collections
 

@@ -7,7 +7,9 @@ from zipfile import ZipFile
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
 
-from modules.config import Configuration
+from modules.configuration import Configuration
+from modules.commandlineInput import CommandlineInput
+from modules.queryManager import QueryManager
 
 from model.model import Base
 
@@ -381,3 +383,86 @@ class ProjectCommand(Command, ABC):
         print("--------------------------------------------------------------------------------")
         print(">> Note: all projects will not be versioned.")
         print("--------------------------------------------------------------------------------")
+
+
+class ProjectInfoDialog:
+    def __init__(self, configuration: Configuration) -> None:
+        super().__init__(configuration)
+
+    @staticmethod
+    def show() -> None:
+        print("--------------------------------------------------------------------------------")
+        print("Project structure:")
+        print("- data:")
+        print("  - config:")
+        print("    - configuration.ini: The configuration file for the project.")
+        print("    - queries.ini: The queries file for the project.")
+        print("  - database:")
+        print("    - <database name>:")
+        print("      - <table name>:")
+        print("        - <table name>.csv: The table file.")
+        print("--------------------------------------------------------------------------------")
+
+
+class CleanCommand(Command):
+    def __init__(self, cm: CommandManager, configuration: Configuration) -> None:
+        super().__init__(cm, name="clean",
+                         description="This command will clean up the project in different ways.")
+        self.configuration = configuration
+        self.query_manager: QueryManager = QueryManager(configuration)
+
+    def execute(self, *args) -> None:
+        if len(args) > 0:
+            command: InputParser = InputParser(args[0])
+            if command.get_command() == AbstractKeyword.SAMPLES:
+                self.delete_samples()
+            else:
+                print(f"[ERROR] Attribute {command.get_command()} not found.")
+        else:
+            print("[ERROR] Unknown clean command.")
+            print("[TIPP] To see the available commands, type 'help clean'.")
+        print("--------------------------------------------------------------------------------")
+
+    def help(self) -> None:
+        print("--------------------------------------------------------------------------------")
+        print("clean <attribute>:")
+        print("- samples: This command will delete specific samples in the database.")
+        print("--------------------------------------------------------------------------------")
+
+    def delete_samples(self):
+        self.query_manager: QueryManager = QueryManager(self.configuration)
+        print("[INFO] with this command you can delete specific samples in the database.")
+        print("[INFO] Following samples are available:")
+        print("--------------------------------------------------------------------------------")
+        samples: list[str] = self.query_manager.get_samples()
+        for sample in samples:
+            print(f"- {sample[0]} > {sample[1]}")
+        print("--------------------------------------------------------------------------------")
+
+        delete_multiple: bool = CommandlineInput.yes_no_input("Do you want to delete multiple samples? (y/n)")
+        if delete_multiple:
+            min_group_id: int = CommandlineInput.int_input("Please enter the minimum sample id:")
+            max_group_id: int = CommandlineInput.int_input("Please enter the maximum sample id:")
+            print("--------------------------------------------------------------------------------")
+            print(f"[INFO] Minimum group id: {min_group_id}")
+            print(f"[INFO] Maximum group id: {max_group_id}")
+            delete_samples: bool = CommandlineInput.bool_input("Do you want to delete this samples? (y/n)")
+            print("--------------------------------------------------------------------------------")
+            if delete_samples:
+                self.query_manager.delete_samples(min_group_id, max_group_id)
+                print("[INFO] Samples deleted.")
+            else:
+                print("[INFO] Samples not deleted.")
+        else:
+            sample_id: int = CommandlineInput.int_input("Please enter the sample id:")
+            print("--------------------------------------------------------------------------------")
+            print(f"[INFO] Sample id: {sample_id}")
+            delete_samples: bool = CommandlineInput.bool_input("Do you want to delete this samples? (y/n)")
+            print("--------------------------------------------------------------------------------")
+            if delete_samples:
+                self.query_manager.delete_sample(sample_id)
+                print("[INFO] Sample deleted.")
+            else:
+                print("[INFO] Sample not deleted.")
+
+        self.query_manager.close()

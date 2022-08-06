@@ -1,6 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 
 from commands.setup import *
+from commands.bootstrap import Bootstrapping
 
 
 class InitializeProject:
@@ -25,6 +26,10 @@ class InitializeProject:
             ConfigurationCommand(self.command_manager, self.configuration))
         self.command_manager.add_command(
             ProjectCommand(self.command_manager, self.configuration))
+        self.command_manager.add_command(
+            Bootstrapping(self.command_manager, self.configuration))
+        self.command_manager.add_command(
+            CleanCommand(self.command_manager, self.configuration))
 
     def start_console(self):
         self.log_welcome()

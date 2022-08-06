@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from model.model import Collections, Groups
-from modules.config import Configuration
+from modules.configuration import Configuration
 from adapter.database.database import Database
 
 
