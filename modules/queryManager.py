@@ -36,8 +36,8 @@ class QueryManager:
         self.connection.commit()
 
     def delete_sample(self, sample_id: int) -> None:
-        self.connection.execute(f"DELETE FROM Collections c WHERE c.group_id = {sample_id}")
-        self.connection.execute(f"DELETE FROM Groups g WHERE g.id = {sample_id}")
+        self.connection.execute(f"DELETE FROM Collections WHERE group_id = {sample_id}")
+        self.connection.execute(f"DELETE FROM Groups WHERE id = {sample_id}")
         self.connection.commit()
 
     def close(self) -> None:

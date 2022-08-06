@@ -7,6 +7,8 @@ from zipfile import ZipFile
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
 
+from adapter.inserting.csv import ImportCSV
+
 from modules.configuration import Configuration
 from modules.commandlineInput import CommandlineInput
 from modules.queryManager import QueryManager
@@ -418,10 +420,9 @@ class CleanCommand(Command):
                 self.delete_samples()
             else:
                 print(f"[ERROR] Attribute {command.get_command()} not found.")
+            print("--------------------------------------------------------------------------------")
         else:
-            print("[ERROR] Unknown clean command.")
-            print("[TIPP] To see the available commands, type 'help clean'.")
-        print("--------------------------------------------------------------------------------")
+            self.help()
 
     def help(self) -> None:
         print("--------------------------------------------------------------------------------")
@@ -466,3 +467,60 @@ class CleanCommand(Command):
                 print("[INFO] Sample not deleted.")
 
         self.query_manager.close()
+
+
+class InsertDataCommand(Command):
+    def __init__(self, cm: CommandManager, configuration: Configuration) -> None:
+        super().__init__(cm, name="insert",
+                         description="This command will insert data into the database.")
+        self.configuration = configuration
+        self.query_manager: QueryManager = QueryManager(configuration)
+
+    def execute(self, *args) -> None:
+        if len(args) > 0:
+            command: InputParser = InputParser(args[0])
+            if command.get_command() == AbstractKeyword.CSV:
+                self.insert_samples()
+            else:
+                print(f"[ERROR] Attribute {command.get_command()} not found.")
+            print("--------------------------------------------------------------------------------")
+        else:
+            self.help()
+
+    def help(self) -> None:
+        print("--------------------------------------------------------------------------------")
+        print("insert <attribute>:")
+        print("- csv: This command will insert data from csv into the database.")
+        print("--------------------------------------------------------------------------------")
+
+    def insert_samples(self) -> None:
+        import_csv: ImportCSV = ImportCSV()
+
+        print("--------------------------------------------------------------------------------")
+        group_id: int = CommandlineInput.int_input("Please enter the sample id:")
+        group_name: str = CommandlineInput.string_input("Please enter the sample name:")
+        print("--------------------------------------------------------------------------------")
+
+        print("CSV column mapping:")
+        user_id_column: str = CommandlineInput.string_input("Name of the user id column in CSV File:")
+        date_column_name: str = CommandlineInput.string_input("Name of the date column in CSV File:")
+        value_column_name: str = CommandlineInput.string_input("Name of the value column in CSV File:")
+        print("--------------------------------------------------------------------------------")
+
+        csv_file_path: str = self.configuration.get_insert_csv_file_path(file_type="csv")
+        print(f"[INFO] The CSV file path: {csv_file_path}")
+        csv_file_path_correct: bool = CommandlineInput.yes_no_input("Is the CSV file path correct? (y/n)")
+        if not csv_file_path_correct:
+            csv_file_path = CommandlineInput.special_file_input("Please enter the CSV file path:", "csv")
+
+        import_csv.insert(
+            # set id and name of the group which the data should be connected to
+            group_id=group_id, name=group_name,
+
+            # set the path to the csv file
+            csv_file=csv_file_path,
+
+            # mapping column from csv file to table column
+            # write here the column name of the csv file
+            user_id_column_name=user_id_column, date_column_name=date_column_name, value_column_name=value_column_name
+        )
