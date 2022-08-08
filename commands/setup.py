@@ -1,12 +1,13 @@
 import os
 from abc import ABC
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import shutil
 from zipfile import ZipFile
 
 from sqlalchemy import create_engine
 from sqlalchemy.future import Engine
 
+from adapter.generator.generate_testdata import Generator
 from adapter.inserting.csv import ImportCSV
 
 from modules.configuration import Configuration
@@ -406,9 +407,9 @@ class ProjectInfoDialog:
         print("--------------------------------------------------------------------------------")
 
 
-class CleanCommand(Command):
+class DeleteCommand(Command):
     def __init__(self, cm: CommandManager, configuration: Configuration) -> None:
-        super().__init__(cm, name="clean",
+        super().__init__(cm, name="delete",
                          description="This command will clean up the project in different ways.")
         self.configuration = configuration
         self.query_manager: QueryManager = QueryManager(configuration)
@@ -458,7 +459,7 @@ class CleanCommand(Command):
             sample_id: int = CommandlineInput.int_input("Please enter the sample id:")
             print("--------------------------------------------------------------------------------")
             print(f"[INFO] Sample id: {sample_id}")
-            delete_samples: bool = CommandlineInput.bool_input("Do you want to delete this samples? (y/n)")
+            delete_samples: bool = CommandlineInput.yes_no_input("Do you want to delete this samples? (y/n)")
             print("--------------------------------------------------------------------------------")
             if delete_samples:
                 self.query_manager.delete_sample(sample_id)
@@ -524,3 +525,90 @@ class InsertDataCommand(Command):
             # write here the column name of the csv file
             user_id_column_name=user_id_column, date_column_name=date_column_name, value_column_name=value_column_name
         )
+
+
+class GenerateDataCommand(Command):
+    def __init__(self, cm: CommandManager, configuration: Configuration) -> None:
+        super().__init__(cm, name="generate",
+                         description="This command will generate data in the database.")
+        self.configuration = configuration
+        self.query_manager: QueryManager = QueryManager(configuration)
+
+    def execute(self, *args) -> None:
+        if len(args) > 0:
+            command: InputParser = InputParser(args[0])
+            if command.get_command() == AbstractKeyword.SAMPLE:
+                self.generate_samples()
+            else:
+                print(f"[ERROR] Attribute {command.get_command()} not found.")
+            print("--------------------------------------------------------------------------------")
+        else:
+            self.help()
+
+    def help(self) -> None:
+        print("--------------------------------------------------------------------------------")
+        print("generate <attribute>:")
+        print("- sample: This command will generate a sample and insert it into the database.")
+        print("--------------------------------------------------------------------------------")
+
+    def generate_samples(self) -> None:
+        start_date: date = CommandlineInput.date_input(
+            "Please enter the start date (%Y-%m-%d):", date_format="%Y-%m-%d")
+        date_step: timedelta = timedelta(days=CommandlineInput.int_input("Please enter the date step", default=1))
+        start_user_id: int = CommandlineInput.int_input("Please enter the start user id", default=1)
+        sample_id: int = CommandlineInput.int_input("Please enter the sample id", default=1)
+        value_range_min: int = CommandlineInput.int_input("Please enter the minimum value", default=0)
+        value_range_max: int = CommandlineInput.int_input("Please enter the maximum value", default=100)
+        nr_of_users: int = CommandlineInput.int_input("Please enter the number of users", default=10)
+        days_per_user: int = CommandlineInput.int_input("Please enter the number of days per user", default=10)
+
+        print("--------------------------------------------------------------------------------")
+
+        sample_generator: Generator = Generator(
+            start_date=start_date, date_steps=date_step,
+            start_user_id=start_user_id, group_id=sample_id,
+            value_range=(value_range_min, value_range_max)
+        )
+
+        if CommandlineInput.yes_no_input("Do you want to generate the data? (y/n)"):
+            sample_generator.generate_data(
+                users=nr_of_users, days_per_user=days_per_user
+            )
+            print("[INFO] Data generated.")
+        else:
+            print("[INFO] Data not generated.")
+
+
+class ShowCommand(Command):
+    def __init__(self, cm: CommandManager, configuration: Configuration) -> None:
+        super().__init__(cm, name="show",
+                         description="This command will show data from the database.")
+        self.configuration = configuration
+        self.query_manager: QueryManager = QueryManager(configuration)
+
+    def execute(self, *args) -> None:
+        if len(args) > 0:
+            command: InputParser = InputParser(args[0])
+            if command.get_command() == AbstractKeyword.SAMPLES:
+                self.show_samples()
+            else:
+                print(f"[ERROR] Attribute {command.get_command()} not found.")
+        else:
+            self.help()
+
+    def help(self) -> None:
+        print("--------------------------------------------------------------------------------")
+        print("show <attribute>:")
+        print("- samples: This command will show all samples from the database.")
+        print("--------------------------------------------------------------------------------")
+
+    def show_samples(self) -> None:
+        print("+------------------------------------------------------------------------------+")
+        print("| Samples                                                                      |")
+        print("+------------------------------------------------------------------------------+")
+        print("|    ID     |                  Name                    |        Columns        |")
+        print("+-----------+------------------------------------------+-----------------------+")
+        for sample in self.query_manager.get_samples():
+            nr_of_columns: int = self.query_manager.get_nr_of_collections_per_sample(sample[0])
+            print(f"| {sample[0]:<9} | {sample[1]:<40} | {nr_of_columns:<21} |")
+        print("+-----------+------------------------------------------+-----------------------+")

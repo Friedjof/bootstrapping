@@ -1,21 +1,25 @@
 import os
+import datetime
 
 
 class CommandlineInput:
     @staticmethod
-    def int_input(prompt: str) -> int:
+    def int_input(prompt: str, default: int = 0) -> int:
         while True:
-            try:
-                return int(input(f"{prompt} "))
-            except ValueError:
+            user_input: str = input(f"{prompt} [default={default}] ")
+            if user_input.isdigit():
+                return int(user_input)
+            elif user_input == '':
+                return default
+            else:
                 print("[ERROR] This is not a valid number.")
                 continue
 
     @staticmethod
-    def float_input(prompt: str) -> float:
+    def float_input(prompt: str, default: float = 0.0) -> float:
         while True:
             try:
-                return float(input(prompt))
+                return float(input(f"{prompt} [default={default}] "))
             except ValueError:
                 print("[ERROR] This is not a valid number.")
                 continue
@@ -25,28 +29,20 @@ class CommandlineInput:
         return input(prompt)
 
     @staticmethod
-    def bool_input(prompt: str) -> bool:
+    def bool_input(prompt: str, default: bool = False) -> bool:
         while True:
             try:
-                return bool(input(prompt))
+                return bool(input(f"{prompt} [default={default}] "))
             except ValueError:
                 print("[ERROR] This is not a valid boolean.")
                 continue
 
     @staticmethod
-    def choice_input(prompt: str, choices: list[str]) -> str:
-        while True:
-            choice: str = input(prompt)
-            if choice in choices:
-                return choice
-            else:
-                print("[ERROR] This is not a valid choice.")
-                continue
-
-    @staticmethod
     def int_choice_input(prompt: str, choices: list[int]) -> int:
+        for choice in choices:
+            print(f"{choices.index(choice)}: {choice}")
         while True:
-            choice: int = CommandlineInput.int_input(prompt)
+            choice: int = CommandlineInput.int_input(f"{prompt} ")
             if choice in choices:
                 return choice
             else:
@@ -55,6 +51,8 @@ class CommandlineInput:
 
     @staticmethod
     def float_choice_input(prompt: str, choices: list[float]) -> float:
+        for choice in choices:
+            print(f"{choices.index(choice)}: {choice}")
         while True:
             choice: float = CommandlineInput.float_input(prompt)
             if choice in choices:
@@ -65,6 +63,8 @@ class CommandlineInput:
 
     @staticmethod
     def string_choice_input(prompt: str, choices: list[str]) -> str:
+        for choice in choices:
+            print(f"{choices.index(choice)}: {choice}")
         while True:
             choice: str = CommandlineInput.string_input(prompt)
             if choice in choices:
@@ -74,14 +74,16 @@ class CommandlineInput:
                 continue
 
     @staticmethod
-    def yes_no_input(prompt: str, choices=None) -> bool:
+    def yes_no_input(prompt: str, choices=None, default: str = "no") -> bool:
         if choices is None:
             choices: list[str] = ["yes", "y", "no", "n"]
         while True:
-            choice: str = CommandlineInput.string_input(prompt)
+            choice: str = CommandlineInput.string_input(f"{prompt} [default={default}] ")
             if choice in choices:
                 return choice in ["yes", "y"]
             else:
+                if choice == "":
+                    return default in ["yes", "y"]
                 print("[ERROR] This is not a valid choice.")
                 continue
 
@@ -124,4 +126,13 @@ class CommandlineInput:
                 return path
             else:
                 print("[ERROR] This is not a valid CSV file.")
+                continue
+
+    @classmethod
+    def date_input(cls, param, date_format: str = "%Y-%m-%d") -> datetime.date:
+        while True:
+            try:
+                return datetime.datetime.strptime(cls.string_input(param), date_format).date()
+            except ValueError:
+                print("[ERROR] This is not a valid date.")
                 continue

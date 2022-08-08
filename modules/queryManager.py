@@ -21,10 +21,15 @@ class QueryManager:
         cursor.execute(self.query_parser[self.space_name][query_name], args)
         return cursor.fetchall()
 
-    def get_samples(self) -> list:
+    def get_samples(self) -> list[tuple]:
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM Groups")
         return cursor.fetchall()
+
+    def get_nr_of_collections_per_sample(self, sample_id) -> int:
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT COUNT(*) FROM Collections WHERE group_id = {sample_id}")
+        return cursor.fetchone()[0]
 
     def delete_samples(self, min_group_id: int, max_group_id: int) -> None:
         self.connection.execute(
