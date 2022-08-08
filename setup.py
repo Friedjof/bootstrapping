@@ -79,7 +79,7 @@ class InitializeProject:
         print("+------------------------------------------------------------------------------+")
         print("| There is no database file. Please create one first.                          |")
         print("| Type 'help create_database' for more information.                            |")
-        print("+-------------------------------------------------------------------------------")
+        print("+------------------------------------------------------------------------------+")
 
     @staticmethod
     def console_read(prompt: str = "$ ") -> str:
