@@ -2,9 +2,9 @@ import random
 import time
 from datetime import datetime, timedelta
 
-from toolbox.configuration.config import Configuration
-from toolbox.database.database import Database
-from toolbox.query.query_manager import QueryManager
+from modules.configuration import Configuration
+from adapter.database.database import Database
+from modules.queryManager import QueryManager
 
 from model.model import Collections, Groups
 
@@ -21,7 +21,7 @@ class Bootstrap:
         self.samples: list = []
 
         self.database: Database = Database(self.config)
-        self.query_manager: QueryManager = QueryManager(self.database.get_sqlite3_session(), self.config)
+        self.query_manager: QueryManager = QueryManager(self.config, connection=self.database.get_sqlite3_session())
 
     def set_original_dataset(self, dataset: list) -> None:
         self.dataset = dataset

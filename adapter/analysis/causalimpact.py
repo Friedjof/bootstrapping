@@ -3,9 +3,9 @@ import sqlite3
 
 import plotly.express as px
 
-from toolbox.serializer.samples import FinalAggregationSerializer
-from toolbox.query.query_manager import QueryManager
-from toolbox.configuration.config import Configuration
+from adapter.serializer.samples import FinalAggregationSerializer
+from modules.queryManager import QueryManager
+from modules.configuration import Configuration
 
 
 class Analyse:
