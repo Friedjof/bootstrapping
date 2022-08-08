@@ -29,9 +29,13 @@ class InitializeProject:
         self.command_manager.add_command(
             Bootstrapping(self.command_manager, self.configuration))
         self.command_manager.add_command(
-            CleanCommand(self.command_manager, self.configuration))
+            DeleteCommand(self.command_manager, self.configuration))
         self.command_manager.add_command(
             InsertDataCommand(self.command_manager, self.configuration))
+        self.command_manager.add_command(
+            GenerateDataCommand(self.command_manager, self.configuration))
+        self.command_manager.add_command(
+            ShowCommand(self.command_manager, self.configuration))
 
     def start_console(self):
         self.log_welcome()

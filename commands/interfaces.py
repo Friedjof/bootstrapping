@@ -1,4 +1,5 @@
 class AbstractKeyword:
+    SAMPLE: str = "sample"
     CSV: str = "csv"
     SAMPLES: str = "samples"
     CREATE: str = "create"
