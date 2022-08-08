@@ -4,7 +4,7 @@ import shutil
 
 
 class Configuration:
-    def __init__(self, config_file: None = None):
+    def __init__(self, config_file=None):
         if config_file is None:
             self.config_file = self.get_config_path()
         else:

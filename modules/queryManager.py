@@ -8,7 +8,7 @@ class QueryManager:
     def __init__(self, configuration: Configuration, connection=None) -> None:
         self.configuration: Configuration = configuration
         if connection is None:
-            self.connection: sqlite3.Connection = sqlite3.connect(self.configuration.get_database_file_path())
+            self.connection: sqlite3.Connection = self.connect()
         else:
             self.connection: sqlite3.Connection = connection
 
@@ -16,14 +16,27 @@ class QueryManager:
 
         self.space_name: str = "queries"
 
-    def get_result(self, query_name: str, *args) -> list:
+    def connect(self) -> sqlite3.Connection:
+        print("Connecting to database...")
+        while True:
+            try:
+                return sqlite3.connect(self.configuration.get_database_file_path())
+            except sqlite3.OperationalError:
+                pass
+
+    def get_result(self, query_name: str, **kwargs) -> list:
         cursor = self.connection.cursor()
-        cursor.execute(self.query_parser[self.space_name][query_name], args)
+        cursor.execute(self.query_parser[self.space_name][query_name].format(**kwargs))
         return cursor.fetchall()
 
     def get_samples(self) -> list[tuple]:
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM Groups")
+        return cursor.fetchall()
+
+    def get_sample(self, sample_id: int) -> list[tuple]:
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT * FROM Collections WHERE group_id = {sample_id}")
         return cursor.fetchall()
 
     def get_nr_of_collections_per_sample(self, sample_id) -> int:

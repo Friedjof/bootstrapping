@@ -24,8 +24,9 @@ class FinalAggregationRow:
 
     def serialize(self) -> dict:
         return {
-            "x": self.index,
-            "y": self.value
+            'sample_id': self.sample_id,
+            "date": self.date.strftime(self.outgoing_date_format),
+            "value": self.value
         }
 
     def serialize_date(self) -> str:
@@ -38,8 +39,11 @@ class FinalAggregationRow:
 class FinalAggregationSerializer:
     dataset: np.ndarray
 
-    def deserialize(self, rows: list[list[str, int, int]]) -> None:
+    def deserialize(self, rows: list[list[str, int, int]]) -> any:
         self.dataset = np.array([FinalAggregationRow(index).deserialize(row) for index, row in enumerate(rows)])
+        return self
 
-    def serialize(self) -> pd.DataFrame:
-        return pd.DataFrame([row.serialize() for row in self.dataset], columns=['x', 'y'])
+    def serialize(self, columns: tuple = None, **kwargs) -> pd.DataFrame:
+        if columns is None:
+            columns: tuple[str, str] = ('x', 'y')
+        return pd.DataFrame([row.serialize() for row in self.dataset], columns=columns, **kwargs).set_index(columns[0])
