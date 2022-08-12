@@ -436,7 +436,7 @@ class DeleteCommand(Command):
         print("[INFO] with this command you can delete specific samples in the database.")
         print("[INFO] Following samples are available:")
         print("--------------------------------------------------------------------------------")
-        samples: list[str] = self.query_manager.get_samples()
+        samples: list[tuple] = self.query_manager.get_samples()
         for sample in samples:
             print(f"- {sample[0]} > {sample[1]}")
         print("--------------------------------------------------------------------------------")
