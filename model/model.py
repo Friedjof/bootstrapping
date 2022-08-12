@@ -29,3 +29,15 @@ class Collections(Base):
 
     def __repr__(self):
         return f'<Collection {", ".join([f"{v}" for v in self.__dict__.values()][1:])}>'
+
+
+class Bootstrap(Base):
+    __tablename__ = 'bootstrap'
+    id = sa.Column(sa.Integer, primary_key=True)
+    group_id = sa.Column(sa.ForeignKey('groups.id'))
+
+    date = sa.Column(sa.Date)
+    value = sa.Column(sa.Integer)
+
+    def __repr__(self):
+        return f'<Bootstrap {", ".join([f"{v}" for v in self.__dict__.values()][1:])}>'

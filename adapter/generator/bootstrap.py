@@ -52,13 +52,13 @@ class Bootstrap:
             new_sample: list = []
             for i, data in enumerate(sample):
                 user_id: int = data[0]
-                result: list = self.query_manager.get_result('join_users_to_dataset', user_id)
+                result: list = self.query_manager.get_result('join_users_to_dataset', user_id=user_id)
                 for row in result:
                     new_sample.append((row[0], index, row[2], row[3], row[4]))
 
             new_samples.append(new_sample)
 
-            print(f"joined {index + 1}/{len(self.samples)} samples")
+            print(f"joined {index + 1}/{len(self.samples)} samples in {timedelta(seconds=(time.time() - start_time))}")
 
         self.samples = new_samples
         print(f"joined {len(self.samples)} samples in {timedelta(seconds=(time.time() - start_time))}")
