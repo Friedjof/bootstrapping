@@ -498,6 +498,13 @@ class InsertDataCommand(Command):
         import_csv: ImportCSV = ImportCSV()
 
         print("--------------------------------------------------------------------------------")
+        csv_file_path: str = self.configuration.get_insert_csv_file_path(file_type="csv")
+        print(f"[INFO] The CSV file path: {csv_file_path}")
+        csv_file_path_correct: bool = CommandlineInput.yes_no_input("Is the CSV file path correct? (y/n)")
+        if not csv_file_path_correct:
+            csv_file_path = CommandlineInput.special_file_input("Please enter the CSV file path:", file_type="csv")
+
+        print("--------------------------------------------------------------------------------")
         group_id: int = CommandlineInput.int_input("Please enter the sample id:")
         group_name: str = CommandlineInput.string_input("Please enter the sample name:")
         print("--------------------------------------------------------------------------------")
@@ -507,12 +514,6 @@ class InsertDataCommand(Command):
         date_column_name: str = CommandlineInput.string_input("Name of the date column in CSV File:")
         value_column_name: str = CommandlineInput.string_input("Name of the value column in CSV File:")
         print("--------------------------------------------------------------------------------")
-
-        csv_file_path: str = self.configuration.get_insert_csv_file_path(file_type="csv")
-        print(f"[INFO] The CSV file path: {csv_file_path}")
-        csv_file_path_correct: bool = CommandlineInput.yes_no_input("Is the CSV file path correct? (y/n)")
-        if not csv_file_path_correct:
-            csv_file_path = CommandlineInput.special_file_input("Please enter the CSV file path:", "csv")
 
         import_csv.insert(
             # set id and name of the group which the data should be connected to
