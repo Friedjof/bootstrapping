@@ -110,6 +110,19 @@ if __name__ == '__main__':
             print("********************************************************************************")
             exit(0)
 
+        if not Configuration.database_directory_exists():
+            print("[WARNING] Database directory not found.")
+            print("> the setup console is not able to start without a database directory.")
+            print("would you like to create a new database directory? (y/n)", end=": ")
+            if input() == 'y':
+                Configuration.reset_database_directory()
+                print("done")
+            else:
+                print("exit...")
+                print("********************************************************************************")
+                exit(0)
+
+
     config: Configuration = Configuration()
     initialize_project: InitializeProject = InitializeProject(configuration=config)
     initialize_project.start_console()
