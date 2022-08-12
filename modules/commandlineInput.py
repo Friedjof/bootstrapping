@@ -128,11 +128,43 @@ class CommandlineInput:
                 print("[ERROR] This is not a valid CSV file.")
                 continue
 
-    @classmethod
-    def date_input(cls, param, date_format: str = "%Y-%m-%d") -> datetime.date:
+    @staticmethod
+    def date_input(param, date_format: str = "%Y-%m-%d") -> datetime.date:
         while True:
             try:
                 return datetime.datetime.strptime(cls.string_input(param), date_format).date()
             except ValueError:
                 print("[ERROR] This is not a valid date.")
+                continue
+
+    @staticmethod
+    def time_input(param, date_format: str = "%H:%M:%S") -> datetime.time:
+        while True:
+            try:
+                return datetime.datetime.strptime(CommandlineInput.string_input(param), date_format).time()
+            except ValueError:
+                print("[ERROR] This is not a valid time.")
+                continue
+
+    @staticmethod
+    def date_time_input(param, date_format: str = "%Y-%m-%d %H:%M:%S") -> datetime.datetime:
+        while True:
+            try:
+                return datetime.datetime.strptime(CommandlineInput.string_input(param), date_format)
+            except ValueError:
+                print("[ERROR] This is not a valid date and time.")
+                continue
+
+    @staticmethod
+    def date_time_choice_input(param, date_format: str = "%Y-%m-%d %H:%M:%S", choices: list[datetime.datetime] = None) -> datetime.datetime:
+        if choices is None:
+            choices = []
+        for choice in choices:
+            print(f"{choices.index(choice)}: {choice.strftime(date_format)}")
+        while True:
+            choice: datetime.datetime = CommandlineInput.date_time_input(param, date_format)
+            if choice in choices:
+                return choice
+            else:
+                print("[ERROR] This is not a valid choice.")
                 continue
