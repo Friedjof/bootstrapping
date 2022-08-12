@@ -60,7 +60,7 @@ class DatabaseCommand(Command):
             self.help()
         else:
             command: InputParser = InputParser(args[0])
-            if command == AbstractKeyword.CREATE:
+            if command.name == AbstractKeyword.CREATE:
                 self.create()
             elif command.name == AbstractKeyword.DELETE:
                 self.delete(*args[1:] if len(args) > 1 else [])
