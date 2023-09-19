@@ -19,19 +19,27 @@ class Bootstrapping(Command):
         self.bootstrap: Bootstrap = Bootstrap(config=self.configuration)
 
     def execute(self, *attributes) -> None:
-        print("Reading the original dataset...")
+        sample_id: int = CommandlineInput.int_input(
+            "Witch sample do you want to use as test-group? ",
+            default=0
+        )
+        print("Reading the test-group dataset...")
         self.bootstrap.set_original_dataset(
             dataset=self.query_manager.get_result(
-                query_name="data_as_bootstrap_sample"
+                query_name="data_as_bootstrap_sample",
+                group_id=sample_id
             )
         )
-        nr_of_samples: int = CommandlineInput.int_input("How many samples do you want to generate?")
+
+        nr_of_samples: int = CommandlineInput.int_input(
+            "How many samples do you want to generate?", default=100)
 
         print("Generating the bootstrap samples...")
         self.bootstrap.choice(nr_of_samples=nr_of_samples)
         print("...done.")
 
-        if CommandlineInput.yes_no_input("Do you want to join the users to the bootstrap samples? (y/n)"):
+        if CommandlineInput.yes_no_input(
+                "Do you want to join the users to the bootstrap samples? (y/n)", default="yes"):
             self.bootstrap.join_users()
 
         # save the bootstrap samples

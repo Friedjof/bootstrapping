@@ -136,8 +136,16 @@ class Configuration:
 
     @staticmethod
     def setup_is_valid() -> bool:
-        return Configuration.config_file_exists() and Configuration.config_template_exists()
+        return Configuration.config_file_exists() and Configuration.config_template_exists() and Configuration.database_directory_exists() and Configuration.query_file_exists() and Configuration.query_template_exists()
 
     @staticmethod
     def reset_query_file() -> None:
         shutil.copy(Configuration.get_query_template_path(), Configuration.get_query_file_path())
+
+    @staticmethod
+    def reset_database_directory() -> None:
+        if os.path.exists(Configuration.get_database_directory_path()):
+            shutil.rmtree(Configuration.get_database_directory_path())
+
+        os.mkdir(Configuration.get_database_directory_path())
+

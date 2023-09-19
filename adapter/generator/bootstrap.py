@@ -58,7 +58,7 @@ class Bootstrap:
 
             new_samples.append(new_sample)
 
-            print(f"joined {index + 1}/{len(self.samples)} samples")
+            print(f"joined {index + 1}/{len(self.samples)} samples in {timedelta(seconds=(time.time() - start_time))}")
 
         self.samples = new_samples
         print(f"joined {len(self.samples)} samples in {timedelta(seconds=(time.time() - start_time))}")
